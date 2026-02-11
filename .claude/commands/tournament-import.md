@@ -11,9 +11,10 @@ agent:
   title: Tournament Data Import & Transformation Engine
   icon: 🏆
   whenToUse: >
-    Use when importing tournament data from external platforms (PS23 Soccer, CSV exports, JSON feeds)
-    into EasyChamp. Handles parsing, transformation, validation, bracket setup, logo fixing,
-    penalty score correction, and post-import verification.
+    Use when importing tournament data into EasyChamp from any source.
+    Handles validation, bracket setup, logo fixing, penalty score correction,
+    and post-import verification. For platform-specific parsing, use the
+    corresponding platform skill (e.g., import-ps23, import-flashscore).
 
 persona:
   role: Tournament Data Import Coordinator
@@ -31,7 +32,6 @@ persona:
 
 commands:
   - help: Show all available commands with descriptions
-  - import {platform} {file}: Parse and transform tournament data from a specific platform
   - validate {file}: Validate import JSON before sending to API (field types, IDs, structure)
   - fix-brackets {champId}: Fix playoff bracket order values and matchDayName in MongoDB
   - fix-logos {champId}: Fix team logos across all 3 collections (champs, groups, fixtures)
@@ -42,19 +42,17 @@ commands:
 
 dependencies:
   knowledge:
-    - api-reference.md
-    - data-types.md
-    - knockout-bracket.md
-    - platform-ps23.md
-    - common-pitfalls.md
+    - core/knowledge/api-reference.md
+    - core/knowledge/data-types.md
+    - core/knowledge/knockout-bracket.md
+    - core/knowledge/common-pitfalls.md
   templates:
-    - fixture-import.json
-    - league-import.json
-    - playoff-bracket-mapping.json
+    - core/templates/fixture-import.json
+    - core/templates/league-import.json
+    - core/templates/playoff-bracket-mapping.json
   scripts:
-    - parse_tournament.py
-    - validate_import.py
-    - fix_post_import.py
+    - core/scripts/validate_import.py
+    - core/scripts/fix_post_import.py
 ```
 
 ---
@@ -176,48 +174,24 @@ As a fallback, update MongoDB directly for the 3 user-facing collections (champs
 [ ] No duplicate fixtures in database
 ```
 
-### PS23 Soccer Platform Guide
+### Platform Plugins
 
-**JSON Export Structure:**
-```json
-{
-  "competition": {
-    "id": "C92",
-    "name": "Superliga 8v8",
-    "start_date": "2024-10-29",
-    "playoffs": { "quarterfinals": [], "semifinals": [], "final": {} }
-  },
-  "all_games": [
-    { "home": "Team A", "away": "Team B", "score": "5-3",
-      "week": 1, "home_scorers": "K. Moosa; L. Peralta",
-      "away_scorers": "J. Smith", "date": "2024-10-29" }
-  ],
-  "standings": [
-    { "team": "Team A", "pos": 1, "played": 9, "wins": 8,
-      "draws": 0, "losses": 1, "gf": 45, "ga": 12, "pts": 24 }
-  ],
-  "all_player_stats": [
-    { "player": "K. Moosa", "team": "Team A", "goals": 15 }
-  ]
-}
-```
+This core skill handles everything about importing INTO EasyChamp. For parsing FROM
+a specific source platform, use the corresponding platform skill:
 
-**Logo URL Pattern:**
-```
-https://ps23soccer.com/webfiles/ps23/escudos/{team_id}.png
-```
+| Platform | Skill File | Status |
+|----------|-----------|--------|
+| PS23 Soccer | `import-ps23.md` | Available |
+| FlashScore | `import-flashscore.md` | Not yet created |
 
-**Scorer Parsing Rules:**
-- Semicolon separator: "K. Moosa; L. Peralta"
-- Comma separator: "K. Moosa, L. Peralta"
-- Multiplier prefix: "5x K. Moosa" = 5 goals
-- Multiplier suffix: "K. Moosa x5" = 5 goals
-- Skip: "walk over", "forfeit", empty strings
+**Adding a new platform:**
+1. Copy `PLATFORM-TEMPLATE.md` as your starting point
+2. Create `platforms/{name}/knowledge/platform-guide.md` - document the source data format
+3. Create `platforms/{name}/scripts/parse.py` - parser that outputs EasyChamp import JSON
+4. Create `.claude/commands/import-{name}.md` - platform skill file
+5. The parser output is validated by `core/scripts/validate_import.py` (platform-agnostic)
 
-**ExternalId Generation:**
+**Workflow with platform plugins:**
 ```
-League:  "ps23:{league_name_slug}"
-Team:    "ps23:team:{md5(team_name)}"
-Player:  "ps23:player:{md5(player_name)}"
-Fixture: "ps23:fixture:{home_slug}-vs-{away_slug}-{week}"
+Source website → Platform parser (parse.py) → import.json → validate_import.py → POST /import/league → fix_post_import.py → verify
 ```
