@@ -1,0 +1,121 @@
+{
+  "$comment": "Full league hierarchy template for POST /import/league. All scores MUST be strings.",
+  "ImportSource": 99,
+  "ImportMode": 0,
+  "League": {
+    "Name": "League Name",
+    "Country": "USA",
+    "SportKindName": "Soccer",
+    "ImageUrl": null,
+    "Champs": [
+      {
+        "Name": "Tournament Name",
+        "ExternalId": "ps23:comp:tournament-name",
+        "StartDate": "2024-10-29",
+        "EndDate": "2025-01-28",
+        "IsComplete": true,
+        "SportKindName": "Soccer",
+        "LeagueName": "League Name",
+        "Stages": [
+          {
+            "Name": "Group Stage",
+            "Type": "League",
+            "Groups": [
+              {
+                "Name": "Group A",
+                "Fixtures": [
+                  {
+                    "Id": "ps23:fixture:team-a-vs-team-b-1",
+                    "Date": "2024-10-29",
+                    "HomeTeamScore": "5",
+                    "AwayTeamScore": "3",
+                    "MatchDay": 1,
+                    "MatchDayName": "1",
+                    "Status": 2,
+                    "HomeTeam": {
+                      "Id": "ps23:team:abc123",
+                      "Name": "Team A",
+                      "ImageUrl": "https://example.com/team-a.png",
+                      "SportKindName": "Soccer",
+                      "TeamMembers": [
+                        {
+                          "Player": {
+                            "FullName": "K. Moosa",
+                            "Id": "ps23:player:def456",
+                            "OtherFullName": "",
+                            "SportKindName": "Soccer"
+                          }
+                        }
+                      ]
+                    },
+                    "AwayTeam": {
+                      "Id": "ps23:team:ghi789",
+                      "Name": "Team B",
+                      "ImageUrl": "https://example.com/team-b.png",
+                      "SportKindName": "Soccer",
+                      "TeamMembers": []
+                    },
+                    "HomeSquad": [
+                      {
+                        "Player": {
+                          "FullName": "K. Moosa",
+                          "Id": "ps23:player:def456",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "SquadType": 0,
+                        "IsPlayed": true
+                      }
+                    ],
+                    "AwaySquad": [],
+                    "Events": [
+                      {
+                        "IsHomeEvent": true,
+                        "Minute": "5",
+                        "EventType": "scorer",
+                        "Player": {
+                          "FullName": "K. Moosa",
+                          "Id": "ps23:player:def456",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "Description": "Goal by K. Moosa"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "Name": "Playoffs",
+            "Type": "Playoff",
+            "Groups": [
+              {
+                "Name": "Playoffs",
+                "Fixtures": [
+                  {
+                    "$comment": "Playoff fixtures MUST have matchDayName in lowercase and Order set for bracket rendering",
+                    "Id": "ps23:fixture:team-a-vs-team-b-qf1",
+                    "Date": "2025-01-14",
+                    "HomeTeamScore": "3",
+                    "AwayTeamScore": "1",
+                    "MatchDay": 1,
+                    "MatchDayName": "quarterfinal",
+                    "Status": 2,
+                    "Order": 4,
+                    "HomeTeam": { "Id": "ps23:team:abc123", "Name": "Team A" },
+                    "AwayTeam": { "Id": "ps23:team:ghi789", "Name": "Team B" },
+                    "HomeSquad": [],
+                    "AwaySquad": [],
+                    "Events": []
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
