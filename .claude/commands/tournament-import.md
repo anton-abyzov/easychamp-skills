@@ -97,6 +97,8 @@ python scripts/ps23_data_import.py --multi -c C86 C92 --clean --post-import --dr
 | `/image` | POST | Upload image to MinIO | Params: entity=Teams, sportKind=Soccer |
 | `/fixture/{id}/score` | PUT | Update fixture scores | Does NOT save `Order` field - use MongoDB directly |
 | `/fixture/{id}` | PUT | Update fixture (full) | Saves Order, but requires auth + complete object |
+| `/fixture/{id}/event/bulk` | POST | Bulk add events to fixture | Use for adding events after structural import |
+| `/champs/{id}?forceDelete=true` | DELETE | Hard delete champ + all deps | Cascades: stages, groups, fixtures, events, stats |
 | `/teams/{id}` | PUT | Update team details | Publishes RabbitMQ UpdateImage |
 | `/fixture/{id}/event/bulk` | POST | Bulk add player events | Advanced metrics support |
 | `/fixture/champ/{champId}` | GET | Get fixtures by champ | Useful for verification |
@@ -164,19 +166,26 @@ All images MUST be hosted on MinIO (`minio.easychamp.com/sportchamp-prod`):
 11. **League ExternalId**: Must be consistent across imports for team reuse
 12. **PeriodScores required for penalties**: Frontend reads from `periodScores.find(x => x.type === "penalties")` - NOT from HomePenaltyScore/AwayPenaltyScore fields. Must include PeriodScores with `regular_period` and `penalties` entries
 13. **ExternalId refresh on reimport**: Only refresh structural IDs (league/champ/stage/group/fixture/event). Keep team/player IDs to reuse existing global entities
-14. **Import NOT idempotent at league level**: Once a league ExternalId exists, the entire import is silently skipped. Delete first with `forceDelete=true`, then reimport with fresh structural IDs
+14. **Import is idempotent for teams**: Re-importing updates team logos and player data without needing to delete existing leagues/competitions
 15. **Team ImageUrl change detection**: ImportTeamsService only updates when ImageUrl differs from existing value (fixed 2026-02-12)
+16. **Champ.Id vs Champ.ExternalId**: `ImportLeagueService.cs:140` uses `Champ.Id` (NOT `Champ.ExternalId`) as the ExternalId filter for existing champ lookup. If an existing champ matches, import skips fixture creation and calls `ImportMissingStages` instead. To reimport fresh: delete first, then use a new `Champ.Id` UUID in JSON
+17. **Champ-level vs fixture-level TeamMembers**: ChampTeamPlayers are created from `Champs[].Teams[].TeamMembers` (lines 162-190), NOT from fixture-level TeamMembers. ALL event players MUST appear in the champ-level team roster, otherwise NullReferenceException at line 313
+18. **forceDelete endpoint**: `DELETE /champs/{id}?forceDelete=true` cascades ALL dependencies (stages, groups, fixtures, events, stats, ratings, news, favorites, permissions). Use this instead of manual MongoDB deletion. Also: `DELETE /aioptimize/champs/{name}?forceDelete=true`
+19. **MongoDB collection names are camelCase**: `champs`, `fixtures`, `events`, `champTeamPlayers`, `champLeagues`, `champGroupStandings` (NOT PascalCase)
+20. **Two-phase import workaround**: If events cause NullRef, import WITHOUT events first (all fixtures get created), add missing CTPs to MongoDB, then add events via `POST /fixture/{id}/event/bulk`
 
 ### Import Idempotency
 
-The `/import/league` endpoint is **NOT idempotent** at the league/champ level:
-- If `League.ExternalId` exists, the entire import returns immediately (no updates)
-- If `Champ.ExternalId` exists, that champ is skipped entirely
+The `/import/league` endpoint supports **idempotent re-imports**:
+- If `League.ExternalId` exists, reuses existing league and continues processing champs
+- If `Champ.ExternalId` exists, still runs team/player imports (updates logos, player data), then skips structural recreation (stages, groups, fixtures)
+- If `Champ.ExternalId` is new, creates full structure as normal
 
-**Recommended reimport strategy:**
-1. Delete existing league: `DELETE /champ-leagues/{id}?forceDelete=true`
-2. Refresh structural ExternalIds (league, champ, stage, group, fixture, event) but KEEP team/player IDs
-3. POST to `/import/league?ownerId={userId}`
+**Re-import behavior** (no deletion needed):
+- Team logos: Updated when ImageUrl differs from existing
+- Player data: Updated on every import
+- Structural data (stages, groups, fixtures, events): Only created on first import
+- No duplicate fixtures or events on re-import
 
 **Team-level idempotency** works correctly:
 - Teams are matched by ExternalId first, then by (name + sportKind + country + ownerId)

@@ -138,6 +138,9 @@ Comp:    "ps23:comp:{comp_name_slug}"
 6. **Video/media links**: Games may have `video_url` and `media_album` fields. Not imported to EasyChamp but worth preserving.
 7. **Penalty shootouts need PeriodScores**: Setting `HomePenaltyScore`/`AwayPenaltyScore` is NOT enough. Must also include `PeriodScores` with `regular_period` (full-time score) and `penalties` entries. Frontend reads exclusively from PeriodScores.
 8. **Logo ID mismatches**: Teams may share similar names across competitions but have different escudo IDs. Always verify by inspecting the PS23 competition page HTML. Known corrections from C86/C92: FE.FC=329, FC Noise=325, Nacional=326, Miramar CF=316.
+9. **Event players MUST be in champ-level Teams**: The import creates ChampTeamPlayers from `Champs[].Teams[].TeamMembers` (NOT from fixture-level TeamMembers). If a player scores but is missing from the champ-level team roster, the import crashes with NullReferenceException at `ImportLeagueService.cs:313`. Always ensure ALL event players appear in BOTH champ-level AND fixture-level TeamMembers.
+10. **PS23 Week numbering quirk**: PS23 website sometimes labels two different weeks as "Week 2" (skipping "Week 3"). The import script should use sequential week numbering regardless of PS23 labels.
+11. **Incomplete scorer data**: PS23 may list fewer scorers than the actual score (e.g., 3 scorers for 7 goals). The import correctly sets the score but events will be incomplete. This is a data quality limitation of PS23 exports.
 
 ## LOGO VERIFICATION
 
@@ -163,17 +166,28 @@ Known correct logo IDs (as of Feb 2026):
 
 ## REIMPORT STRATEGY
 
-For a clean reimport:
-
+### Quick reimport (update teams/logos only):
+Reimport is idempotent - no deletion needed:
 1. **Transform**: `python scripts/ps23_data_import.py --multi -c C86 C92`
-2. **Refresh structural IDs** (keep team/player IDs):
-   ```python
-   # Only refresh: League, Champ, Stage, Group, Fixture, Event IDs
-   # Keep: Team.Id, Player.Id (for matching existing global entities)
-   ```
-3. **Delete existing**: `DELETE /champ-leagues/{id}?forceDelete=true`
-4. **Import**: `POST /import/league?ownerId={userId}` with refreshed JSON
-5. **Verify**: Check events, penalties, logos, standings, brackets
+2. **Import**: `python scripts/ps23_data_import.py --input PS23_MULTI_IMPORT.json --post-import`
+   - Existing league/champ: reused, teams & players updated (logos, names)
+   - New league/champ: full structure created
+3. **Verify**: Check events, penalties, logos, standings, brackets
+
+### Full reimport (recreate everything):
+Use the **hard delete** API endpoint for cascading deletion, then reimport:
+1. **Delete**: `DELETE /champs/{champId}?forceDelete=true` (cascades stages, groups, fixtures, events, stats, ratings)
+2. **Change Champ.Id**: Generate a new UUID for `Champ.Id` in the JSON to avoid ExternalId lookup match
+3. **Import**: Re-run the import pipeline
+
+### Two-phase import (workaround for NullRef bug):
+If import fails with NullReferenceException on events:
+1. **Phase 1**: Import JSON with ALL events removed (`Events: []` on every fixture) → creates all fixtures
+2. **Phase 2**: Add missing ChampTeamPlayers directly to MongoDB if needed
+3. **Phase 3**: Add events via `POST /fixture/{id}/event/bulk` API endpoint
+
+**Note**: Structural data (stages, groups, fixtures, events) is only created on first import.
+`ImportLeagueService.cs:140` uses `Champ.Id` (NOT `Champ.ExternalId`) for the existing champ lookup.
 
 ## VALIDATION CHECKLIST (PS23-Specific)
 
