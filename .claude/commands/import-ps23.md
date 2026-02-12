@@ -28,22 +28,30 @@ commands:
 
 dependencies:
   core_skill: tournament-import.md
-  knowledge:
-    - platforms/ps23/knowledge/platform-guide.md
   scripts:
-    - platforms/ps23/scripts/parse.py
+    - scripts/ps23_data_import.py
 ```
 
 ---
 
 ## PS23 IMPORT WORKFLOW
 
-```
-1. Get data: PS23 admin JSON export OR scrape from ps23soccer.com/competition/{id}
-2. Parse:    python platforms/ps23/scripts/parse.py --input data.json --output import.json
-3. Validate: python core/scripts/validate_import.py import.json --strict
-4. Import:   curl -X POST https://api.easychamp.com/import/league -d @import.json
-5. Fix:      python core/scripts/fix_post_import.py verify --champ-id {id}
+```bash
+# 1. Single competition transform:
+python scripts/ps23_data_import.py --input ~/Downloads/C92_ULTIMATE_COMPLETE.json
+
+# 2. Multi-competition (shared teams):
+python scripts/ps23_data_import.py --multi -c C86 C92
+
+# 3. Full pipeline (transform + clean + migrate logos + import + verify):
+python scripts/ps23_data_import.py --multi -c C86 C92 \
+  --clean --migrate-logos --post-import --validate --validate-brackets
+
+# 4. Import existing JSON:
+python scripts/ps23_data_import.py --input /path/to/PS23_MULTI_IMPORT.json --post-import
+
+# 5. Verify existing import:
+python scripts/ps23_data_import.py --verify-only
 ```
 
 ## PS23 JSON EXPORT FORMAT
@@ -101,11 +109,14 @@ PS23 uses inconsistent scorer formats across competitions:
 ## LOGO URL PATTERN
 
 ```
-https://ps23soccer.com/webfiles/ps23/escudos/{team_id}.png
+Source: https://ps23soccer.com/webfiles/ps23/escudos/{team_id}.png
 ```
 
 Logo IDs must be looked up from the PS23 admin dashboard or website HTML.
 There is NO programmatic API to get logo IDs.
+
+**IMPORTANT**: All logos MUST be hosted on MinIO, not external URLs. Use `--migrate-logos`
+flag to auto-download from PS23 and re-upload to MinIO (`minio.easychamp.com/sportchamp-prod`).
 
 ## EXTERNAL ID GENERATION
 
@@ -123,8 +134,46 @@ Comp:    "ps23:comp:{comp_name_slug}"
 2. **Duplicate players across teams**: Same player on multiple teams (e.g., F. Gutierrez in C92). Parser generates unique IDs per team automatically.
 3. **Playoff fixtures in group stage**: Some exports include playoff games in `all_games` AND `playoffs`. Deduplicate by team pair + score.
 4. **Missing dates**: Playoff fixtures may have null dates. Calculate from week number or use end_date.
-5. **Stale logo URLs**: PS23 changes logo IDs when teams re-register. Always verify URLs return HTTP 200.
+5. **Stale logo URLs**: PS23 changes logo IDs when teams re-register. Always verify against ps23soccer.com/tables-{comp_id} HTML source.
 6. **Video/media links**: Games may have `video_url` and `media_album` fields. Not imported to EasyChamp but worth preserving.
+7. **Penalty shootouts need PeriodScores**: Setting `HomePenaltyScore`/`AwayPenaltyScore` is NOT enough. Must also include `PeriodScores` with `regular_period` (full-time score) and `penalties` entries. Frontend reads exclusively from PeriodScores.
+8. **Logo ID mismatches**: Teams may share similar names across competitions but have different escudo IDs. Always verify by inspecting the PS23 competition page HTML. Known corrections from C86/C92: FE.FC=329, FC Noise=325, Nacional=326, Miramar CF=316.
+
+## LOGO VERIFICATION
+
+Logo IDs change between PS23 competition registrations. To verify:
+
+```bash
+# Fetch PS23 competition page and extract logo URLs from HTML
+curl -s 'https://ps23soccer.com/tables-92' | grep -oP 'escudos/\d+\.png' | sort -u
+
+# Cross-reference with _TEAM_LOGOS_RAW dictionary in ps23_data_import.py
+# Each team's logo ID must match what's rendered on the PS23 website
+```
+
+Known correct logo IDs (as of Feb 2026):
+| Team | Logo ID | Notes |
+|------|---------|-------|
+| Atenas Pocito | 328 | |
+| EasyChamp | 319 | |
+| FE.FC | 329 | Was incorrectly 317 |
+| FC Noise | 325 | Was incorrectly 320 |
+| Nacional | 326 | Was incorrectly 316 |
+| Miramar CF | 316 | Was incorrectly 326 (swapped with Nacional) |
+
+## REIMPORT STRATEGY
+
+For a clean reimport:
+
+1. **Transform**: `python scripts/ps23_data_import.py --multi -c C86 C92`
+2. **Refresh structural IDs** (keep team/player IDs):
+   ```python
+   # Only refresh: League, Champ, Stage, Group, Fixture, Event IDs
+   # Keep: Team.Id, Player.Id (for matching existing global entities)
+   ```
+3. **Delete existing**: `DELETE /champ-leagues/{id}?forceDelete=true`
+4. **Import**: `POST /import/league?ownerId={userId}` with refreshed JSON
+5. **Verify**: Check events, penalties, logos, standings, brackets
 
 ## VALIDATION CHECKLIST (PS23-Specific)
 
@@ -134,12 +183,14 @@ After parsing, verify:
 [ ] Total goals in standings (GF) matches sum of home/away scores
 [ ] No duplicate fixtures (team pair + week)
 [ ] All playoff fixtures have correct matchDayName (lowercase, no hyphens)
-[ ] Logo URLs return HTTP 200
+[ ] Logo URLs return HTTP 200 (verify against PS23 website HTML)
 [ ] Player goal counts match between events and player stats
 [ ] Dates are in chronological order
+[ ] PeriodScores included for all penalty fixtures (regular_period + penalties)
+[ ] Bracket Order values follow binary tree pattern (see tournament-import.md)
 ```
 
-Then run core validation:
-```
-python core/scripts/validate_import.py import.json --strict
+Then run the built-in validation:
+```bash
+python scripts/ps23_data_import.py --input import.json --validate --validate-brackets
 ```

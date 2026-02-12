@@ -214,3 +214,83 @@ db.Fixture.find()  # 0 results
 # CORRECT
 db.fixtures.find()  # All fixtures
 ```
+
+## 16. Events Not Imported (ChampTeamId Missing)
+
+**Fixed 2026-02-12** in `ImportLeagueService.cs`.
+
+The event import code computed `champTeamId` via `GetChampTeamIdFromFixtureByPlayerId()` but never assigned it to `eventDto.ChampTeamId`. Events were created with `ChampTeamId = Guid.Empty`, causing silent failure (events not visible on fixtures).
+
+```csharp
+// BEFORE (broken) - eventDto.ChampTeamId was never set
+var champTeamId = GetChampTeamIdFromFixtureByPlayerId(player.Id, existingFixture);
+var champTeamPlayer = await _champTeamPlayerService.GetChampTeamPlayer(champTeamId, player.Id);
+eventDto.ChampTeamPlayerId = champTeamPlayer.Id;
+eventDto.PlayerId = player.Id;
+// ChampTeamId is Guid.Empty here!
+
+// AFTER (fixed) - must explicitly set ChampTeamId
+eventDto.ChampTeamId = champTeamId;  // THIS LINE WAS MISSING
+```
+
+## 17. PeriodScores AutoMapper Field Name Mismatch
+
+**Fixed 2026-02-12** in `ApiCoreImportEntityProfile.cs`.
+
+Import model uses PascalCase (`HomeScore`/`AwayScore`) but DTO uses snake_case (`Home_score`/`Away_score`). AutoMapper convention-based mapping doesn't match these, so PeriodScores were created with null values.
+
+```csharp
+// Must add explicit mapping in AutoMapper profile
+CreateMap<PeriodScore, PeriodScoreDto>()
+    .ForMember(dest => dest.Home_score, source => source.MapFrom(s => s.HomeScore))
+    .ForMember(dest => dest.Away_score, source => source.MapFrom(s => s.AwayScore));
+```
+
+## 18. Team Logos Not Updated on Reimport
+
+**Fixed 2026-02-12** in `ImportTeamsService.cs`.
+
+The `ImportTeamsService` had a dead code bug where the team update branch was unreachable. The original code checked `if (existingTeam != null)` followed by `else if (existingTeam == null)`, covering all cases - the `else if (...)` update branch could never execute.
+
+Fix: Restructure to `if (null) → create; else if (needs update) → update; else → skip`. Added `existingTeam.ImageUrl != team.ImageUrl` condition to trigger updates when logos change.
+
+## 19. PeriodScores Required for Penalty Display
+
+The frontend reads penalties ONLY from `fixture.periodScores.find(x => x.type === "penalties")` (in `ec-webcore-lib/src/utils/score.ts`). Setting `HomePenaltyScore`/`AwayPenaltyScore` string fields is NOT sufficient - `SharedFixtureService.cs` actually CLEARS those fields when `PeriodScores` list is empty.
+
+```json
+// WRONG - penalty fields set but PeriodScores missing
+{
+  "HomePenaltyScore": "2",
+  "AwayPenaltyScore": "3"
+}
+
+// CORRECT - MUST include PeriodScores
+{
+  "HomePenaltyScore": "2",
+  "AwayPenaltyScore": "3",
+  "PeriodScores": [
+    { "HomeScore": "4", "AwayScore": "4", "Type": "regular_period", "Number": 1 },
+    { "HomeScore": "2", "AwayScore": "3", "Type": "penalties", "Number": 2 }
+  ]
+}
+```
+
+## 20. ExternalId Refresh Rules for Reimport
+
+When reimporting (delete + recreate), only refresh structural IDs - NOT team/player IDs:
+
+- **Refresh**: League, Champ, Stage, Group, Fixture, Event IDs (structural hierarchy)
+- **Keep**: Team and Player ExternalIds (used for matching existing global entities)
+
+If team/player ExternalIds are refreshed, new duplicates are created instead of reusing existing entities.
+
+## 21. Import Idempotency (League Level)
+
+`ImportLeagueService.cs` checks `if (existingChampLeague != null) return;` at lines 100-105. This means once a league ExternalId exists, the entire import is silently skipped - no updates.
+
+To reimport: delete the league first (`DELETE /champ-leagues/{id}?forceDelete=true`), then import with fresh structural ExternalIds.
+
+## 22. GHA Concurrency Cancellation
+
+Pushing rapidly to the same branch may cancel in-progress GHA builds. The latest push's build includes all prior commits, so only the last build's Docker image matters. But be aware that cancelled builds mean intermediate commits are never independently deployed.

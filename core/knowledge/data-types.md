@@ -46,11 +46,24 @@
   stageRef: { _id: ObjectId("..."), name: "Group Stage" },
   champRef: { _id: ObjectId("..."), name: "Tournament" },  // NOTE: _id not Id
   champLeagueRef: { _id: ObjectId("...") },
-  periodScores: [{
-    Home_score: "2",    // snake_case (not HomeScore)
-    Away_score: "3",    // snake_case (not AwayScore)
-    Type: "penalties"   // auto-lowercased by API
-  }],
+  periodScores: [
+    // IMPORTANT: Import JSON uses PascalCase (HomeScore/AwayScore) but
+    // MongoDB stores snake_case (Home_score/Away_score). AutoMapper mapping
+    // was fixed 2026-02-12 to handle this conversion explicitly.
+    // Frontend reads penalties from: periodScores.find(x => x.type === "penalties")
+    {
+      Home_score: "4",    // snake_case in MongoDB (mapped from PascalCase in import)
+      Away_score: "4",    // Full-time score
+      Type: "regular_period",
+      Number: 1
+    },
+    {
+      Home_score: "2",    // Penalty shootout score
+      Away_score: "3",
+      Type: "penalties",  // MUST be lowercase "penalties"
+      Number: 2
+    }
+  ],
   homeSquad: [{
     player: {
       id: "player-guid",
@@ -112,16 +125,33 @@
 
 ## Key Type Differences
 
-| Field | API Input (DTO) | MongoDB Storage |
-|-------|-----------------|-----------------|
-| Fixture._id | string GUID | string |
-| Champ._id | Guid | ObjectId |
-| Group._id | Guid | ObjectId |
-| Stage._id | Guid | ObjectId |
-| Scores | string | string |
-| PenaltyScores | string | string |
-| PeriodScores field names | Home_score (snake) | Home_score (snake) |
-| MatchDayName | string | string |
-| Status | int enum | int |
-| Order | int | int |
-| WinnerTeamId | Guid | string |
+| Field | Import Model (JSON) | DTO (C#) | MongoDB Storage |
+|-------|---------------------|----------|-----------------|
+| Fixture._id | string GUID | string GUID | string |
+| Champ._id | string | Guid | ObjectId |
+| Group._id | string | Guid | ObjectId |
+| Stage._id | string | Guid | ObjectId |
+| Scores | string | string | string |
+| PenaltyScores | string | string | string |
+| PeriodScores.HomeScore | **HomeScore** (PascalCase) | **Home_score** (snake) | Home_score (snake) |
+| PeriodScores.AwayScore | **AwayScore** (PascalCase) | **Away_score** (snake) | Away_score (snake) |
+| MatchDayName | string | string | string |
+| Status | int enum | int enum | int |
+| Order | int | int | int |
+| WinnerTeamId | string | Guid | string |
+
+**CRITICAL**: PeriodScores field names differ between import JSON and DTO/MongoDB.
+AutoMapper explicit mapping required (added 2026-02-12):
+```csharp
+CreateMap<PeriodScore, PeriodScoreDto>()
+    .ForMember(dest => dest.Home_score, source => source.MapFrom(s => s.HomeScore))
+    .ForMember(dest => dest.Away_score, source => source.MapFrom(s => s.AwayScore));
+```
+
+## Backend Import Service Bugs (Fixed)
+
+| Bug | File | Fix Date | Description |
+|-----|------|----------|-------------|
+| ChampTeamId missing | ImportLeagueService.cs:294 | 2026-02-12 | `eventDto.ChampTeamId` never set - events created with Guid.Empty |
+| PeriodScore mapping | ApiCoreImportEntityProfile.cs | 2026-02-12 | PascalCase→snake_case mismatch - scores stored as null |
+| Team update dead code | ImportTeamsService.cs:74-93 | 2026-02-12 | Update branch unreachable - teams never updated on reimport |

@@ -29,6 +29,7 @@ persona:
     - Never trust API responses blindly - some endpoints silently ignore fields
     - Use ExternalIds for deduplication - idempotent imports prevent duplicates
     - Playoff bracket structure is a binary tree - order values must match nodeIds
+    - All images (logos, photos) MUST be hosted on MinIO, not external URLs
 
 commands:
   - help: Show all available commands with descriptions
@@ -40,24 +41,52 @@ commands:
   - template {type}: Generate import template (fixture|league|playoff)
   - recalculate {champId}: Trigger standings recalculation via API
 
-dependencies:
-  knowledge:
-    - core/knowledge/api-reference.md
-    - core/knowledge/data-types.md
-    - core/knowledge/knockout-bracket.md
-    - core/knowledge/common-pitfalls.md
-  templates:
-    - core/templates/fixture-import.json
-    - core/templates/league-import.json
-    - core/templates/playoff-bracket-mapping.json
-  scripts:
-    - core/scripts/validate_import.py
-    - core/scripts/fix_post_import.py
+scripts:
+  - scripts/ps23_data_import.py  # Consolidated import pipeline
 ```
 
 ---
 
 ## EMBEDDED KNOWLEDGE (Always Available)
+
+### Consolidated Import Pipeline
+
+The main import tool is `scripts/ps23_data_import.py`. It handles the full pipeline:
+
+```bash
+# Transform only (write JSON):
+python scripts/ps23_data_import.py --input /path/to/data.json
+
+# Multi-competition transform with shared teams:
+python scripts/ps23_data_import.py --multi -c C86 C92
+
+# Full pipeline: transform + clean + migrate logos + import + verify:
+python scripts/ps23_data_import.py --multi -c C86 C92 \
+  --clean --migrate-logos --post-import --validate --validate-brackets
+
+# Verify existing import only:
+python scripts/ps23_data_import.py --verify-only
+
+# Dry run (show plan without executing):
+python scripts/ps23_data_import.py --multi -c C86 C92 --clean --post-import --dry-run
+```
+
+**Flags:**
+| Flag | Purpose |
+|------|---------|
+| `--input / -i` | Input JSON file(s) |
+| `--output / -o` | Output JSON file |
+| `--competition / -c` | Competition ID(s) - auto-finds in Downloads |
+| `--multi` | Combine multiple JSONs into one league import |
+| `--validate / -v` | Validate output JSON structure |
+| `--validate-brackets` | Print bracket tree and verify team progression |
+| `--post-import` | Import to production via Keycloak + API |
+| `--clean` | Delete existing league/competitions first |
+| `--migrate-logos` | Download external logos → upload to MinIO |
+| `--dry-run` | Show what would happen without executing |
+| `--verify-only` | Only verify existing import |
+| `--kc-user` | Keycloak admin username (default: admin) |
+| `--kc-password` | Keycloak password (or KC_ADMIN_PASSWORD env var) |
 
 ### API Endpoints
 
@@ -65,9 +94,10 @@ dependencies:
 |----------|--------|---------|-------|
 | `/import/league` | POST | Full league import (recommended) | Single atomic operation, creates entire hierarchy |
 | `/import/fixtures` | POST | Batch fixture import | Idempotent, existing fixtures updated |
+| `/image` | POST | Upload image to MinIO | Params: entity=Teams, sportKind=Soccer |
 | `/fixture/{id}/score` | PUT | Update fixture scores | Does NOT save `Order` field - use MongoDB directly |
 | `/fixture/{id}` | PUT | Update fixture (full) | Saves Order, but requires auth + complete object |
-| `/teams/{id}` | PUT | Update team details | Publishes RabbitMQ UpdateImage to update ALL collections (code covers champs+groups+fixtures+stats). In practice, verify consumer is running - logos may not propagate if RabbitMQ consumer is down |
+| `/teams/{id}` | PUT | Update team details | Publishes RabbitMQ UpdateImage |
 | `/fixture/{id}/event/bulk` | POST | Bulk add player events | Advanced metrics support |
 | `/fixture/champ/{champId}` | GET | Get fixtures by champ | Useful for verification |
 | `/recalculate/champ/{id}/standings` | POST | Recalculate standings | Run after any score changes |
@@ -88,13 +118,6 @@ dependencies:
 | Status | int (enum) | 2 | Using string "Finished". Enum: 0=Scheduled, 1=InProgress, 2=Finished |
 | Dates | string | "2024-10-29" | Including time component |
 | Fixture.Order | int | 4 | null (bracket won't render) |
-| PeriodScores[].Type | string | "penalties" | "penalty", "Penalties" (auto-lowercased by API) |
-| PeriodScores[].Home_score | string | "2" | Note: snake_case, NOT HomeScore |
-| PeriodScores[].Away_score | string | "3" | Note: snake_case, NOT AwayScore |
-| HasPenalties | bool | true | Required for penalty display |
-| HasOvertime | bool | true | Required for overtime display |
-| WinnerTeamId | Guid string | "e0a641..." | Required for penalty/OT winner |
-| UpdateBy | string | "import" | Optional, tracks who made the update |
 
 ### Knockout Bracket Binary Tree
 
@@ -106,39 +129,25 @@ Node IDs (depth=3, 8 teams, byes fill empty nodes):
         / \ / \
        4  5 6  7 (Quarterfinal, depth=2)
 
-PLAYOFF_STAGES_ORDER mapping:
-  quarterfinal = 2 (tree depth level)
-  semifinal    = 1
-  final        = 0
-  third_place  = 0
+Bracket order assignment algorithm:
+  1. Final gets Order=1
+  2. SF whose winner = Final.HomeTeam → Order=2
+  3. SF whose winner = Final.AwayTeam → Order=3
+  4. QF whose winner appears in SF(Order=2) → Order=4 or 5
+  5. QF whose winner appears in SF(Order=3) → Order=6 or 7
 
-fillTree algorithm:
-  First pass:  fixture.order == node.nodeId (exact match)
-  Second pass: Sequential fill by stage depth
-
-CRITICAL: fixture.order MUST be set for brackets to render!
-  - PUT /fixture/{id}/score does NOT save Order field
-  - Must update Order directly in MongoDB fixtures collection
-  - _id is stored as string in MongoDB, not UUID
+CRITICAL: Fixture.Order property added to ec-apicore-lib v3.0.18
+  - AutoMapper now maps Order from import JSON → SaveFixtureDto → MongoDB
+  - ec-standings-api must reference apicore-lib >= 3.0.18
 ```
 
-### Team Image Collections (9+ collections affected)
+### Image Hosting (MinIO)
 
-`TriggerService.UpdateTeamImage()` updates ALL of these when RabbitMQ consumer processes `UpdateImage`:
-
-1. **`champs.TeamRefs[].ImageUrl`** → Participants tab
-2. **`groups.TeamRefs[].ImageUrl`** → Standings tab
-3. **`fixtures.HomeTeam.ImageUrl` / `AwayTeam.ImageUrl`** → Fixture displays
-4. **`champGroupStandings.Standings[].ChampTeam.ImageUrl`** → Standings calculations
-5. **`players.History[].TeamImageUrl`** → Player profiles
-6. **`stagePlayerStats.TeamRef.ImageUrl`** → Player stats
-7. **`stageUserTeamStats.TeamRef.ImageUrl`** → User team stats
-8. **`stageTeamStats.TeamImageUrl`** → Team stats
-9. **`champTeamRating.Team.ImageUrl`** → Team ratings
-
-**WARNING**: Code covers ALL collections, but RabbitMQ consumer must be running.
-If logos don't propagate after `PUT /teams/{id}`, verify `ec-workers` pods are healthy.
-As a fallback, update MongoDB directly for the 3 user-facing collections (champs, groups, fixtures).
+All images MUST be hosted on MinIO (`minio.easychamp.com/sportchamp-prod`):
+- Upload via `POST /image?entity=Teams&sportKind=Soccer`
+- Returns relative path like `Teams/Soccer/logo_guid.png`
+- Full URL: `https://minio.easychamp.com/sportchamp-prod/Teams/Soccer/logo_guid.png`
+- Use `--migrate-logos` flag to auto-download external logos and re-upload to MinIO
 
 ### Common Pitfalls (All Encountered in Production)
 
@@ -148,50 +157,50 @@ As a fallback, update MongoDB directly for the 3 user-facing collections (champs
 4. **Player ID consistency**: Same ID must be used across events, squads, and team rosters
 5. **Squad population**: Include ALL team members in squads, not just scorers
 6. **Duplicate players**: Players on multiple teams need unique IDs per team
-7. **Scorer string parsing**: Handle semicolons, commas, multipliers ("5x Name", "Name x5")
-8. **Walk over/forfeit**: Empty events array, don't create fake player entries
-9. **Order field via API**: `PUT /fixture/{id}/score` silently ignores Order - use MongoDB
-10. **Champ.TeamRefs logos**: Code says RabbitMQ updates them, but verify - if consumer is down, update MongoDB directly
-11. **Penalty score types**: Must be strings "2"/"3", not ints - causes 500 error
-12. **PeriodScores type**: Must be "penalties" (lowercase) for penalty shootout display
-13. **WinnerTeamId**: Must be set as string GUID for penalty/overtime winners
+7. **Walk over/forfeit**: Empty events array, don't create fake player entries
+8. **Order field via API**: Requires ec-apicore-lib >= 3.0.18 (Order property added 2026-02-11)
+9. **Penalty score types**: Must be strings "2"/"3", not ints - causes 500 error
+10. **External logos**: Never reference external URLs - upload to MinIO first
+11. **League ExternalId**: Must be consistent across imports for team reuse
+12. **PeriodScores required for penalties**: Frontend reads from `periodScores.find(x => x.type === "penalties")` - NOT from HomePenaltyScore/AwayPenaltyScore fields. Must include PeriodScores with `regular_period` and `penalties` entries
+13. **ExternalId refresh on reimport**: Only refresh structural IDs (league/champ/stage/group/fixture/event). Keep team/player IDs to reuse existing global entities
+14. **Import NOT idempotent at league level**: Once a league ExternalId exists, the entire import is silently skipped. Delete first with `forceDelete=true`, then reimport with fresh structural IDs
+15. **Team ImageUrl change detection**: ImportTeamsService only updates when ImageUrl differs from existing value (fixed 2026-02-12)
+
+### Import Idempotency
+
+The `/import/league` endpoint is **NOT idempotent** at the league/champ level:
+- If `League.ExternalId` exists, the entire import returns immediately (no updates)
+- If `Champ.ExternalId` exists, that champ is skipped entirely
+
+**Recommended reimport strategy:**
+1. Delete existing league: `DELETE /champ-leagues/{id}?forceDelete=true`
+2. Refresh structural ExternalIds (league, champ, stage, group, fixture, event) but KEEP team/player IDs
+3. POST to `/import/league?ownerId={userId}`
+
+**Team-level idempotency** works correctly:
+- Teams are matched by ExternalId first, then by (name + sportKind + country + ownerId)
+- Teams update when: import not completed, not updated in 24h, or ImageUrl changed
 
 ### Post-Import Verification Checklist
 
 ```
 [ ] Standings tab loads with correct P/W/D/L/GF/GA/Pts
-[ ] All team logos display correctly on Participants tab
-[ ] All team logos display correctly on Standings tab
-[ ] All team logos display correctly on fixture cards
-[ ] Playoff bracket renders without crash
-[ ] Bracket shows correct tree structure with byes
-[ ] Penalty scores display as "X-X (pen Y-Z)"
-[ ] Match center shows correct H2H data
-[ ] No debug console.logs in browser DevTools
-[ ] Player stats (goals) are correct
+[ ] All team logos display correctly (hosted on MinIO)
+[ ] Playoff bracket renders with correct connections
+[ ] QF winners flow to correct SF parent nodes
+[ ] Penalty scores display as "X-X (pen Y-Z)" with winner highlighted
+[ ] Player stats (goals) are correct - top scorers list complete
+[ ] Events visible on fixture detail pages (goals, cards)
 [ ] Fixture dates are correct
-[ ] Fixture statuses are all "Finished" (status=2)
 [ ] No duplicate fixtures in database
+[ ] Teams shared across competitions in same league
+[ ] PeriodScores have non-null Home_score/Away_score values
 ```
 
 ### Platform Plugins
-
-This core skill handles everything about importing INTO EasyChamp. For parsing FROM
-a specific source platform, use the corresponding platform skill:
 
 | Platform | Skill File | Status |
 |----------|-----------|--------|
 | PS23 Soccer | `import-ps23.md` | Available |
 | FlashScore | `import-flashscore.md` | Not yet created |
-
-**Adding a new platform:**
-1. Copy `PLATFORM-TEMPLATE.md` as your starting point
-2. Create `platforms/{name}/knowledge/platform-guide.md` - document the source data format
-3. Create `platforms/{name}/scripts/parse.py` - parser that outputs EasyChamp import JSON
-4. Create `.claude/commands/import-{name}.md` - platform skill file
-5. The parser output is validated by `core/scripts/validate_import.py` (platform-agnostic)
-
-**Workflow with platform plugins:**
-```
-Source website → Platform parser (parse.py) → import.json → validate_import.py → POST /import/league → fix_post_import.py → verify
-```
