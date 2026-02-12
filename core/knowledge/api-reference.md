@@ -99,6 +99,64 @@ Get competition details including TeamRefs (used by Participants tab).
 ### POST /recalculate/champ/{id}/standings
 Trigger standings recalculation. Run after score changes.
 
+## Image Upload
+
+### POST /image
+Upload image to Minio S3 storage. Returns relative path.
+
+**Parameters (query string):**
+- `entity`: Category - `Teams`, `Players`, `Others`
+- `sportKind`: Sport name - `Soccer`, `Basketball`, etc.
+
+**Request:** multipart/form-data with `file` field.
+
+**Response:** Relative path string, e.g., `Teams/Soccer/logo_guid.png`
+
+Full URL: `https://minio.easychamp.com/sportchamp-prod/{relative_path}`
+
+**Image Pipeline (`scripts/image_pipeline.py`):**
+```python
+from image_pipeline import ImagePipeline
+
+pipeline = ImagePipeline(api_url="http://localhost:15010", sport_kind="Soccer")
+updated_json = pipeline.process_import_json(import_data)  # Replaces external URLs with Minio paths
+```
+
+Or via CLI flag: `python ps23_data_import.py --upload-images`
+
+## Player History (Transfer History)
+
+Players can have `Histories` array in import JSON for team attachment tracking.
+
+**Import JSON format:**
+```json
+{
+  "FullName": "John Doe",
+  "Histories": [{
+    "TeamId": "ps23:team:abc123",
+    "TeamName": "Team A",
+    "StartDate": "2024-04-30",
+    "EndDate": "2024-10-15",
+    "IsActive": true,
+    "ChampId": "ps23:champ:def456",
+    "ChampName": "Tournament Name",
+    "Type": 0
+  }]
+}
+```
+
+**Fields:** TeamId (required, matches team ExternalId), StartDate (required), EndDate (optional), IsActive (required), Type (0=Player, 1=OnLoan)
+
+ImportPlayersService resolves TeamId and ChampId from external strings to internal GUIDs during import.
+
+## Delete (Force)
+
+### DELETE /champs/{champId}?forceDelete=true
+Cascade delete: stages, groups, fixtures, events, stats, ratings, news, favorites, permissions.
+
+### DELETE /champ-leagues/{leagueId}
+Delete league (must delete champs first or use separate forceDelete).
+
 ## Authentication
 
 Most write endpoints require Bearer token:
