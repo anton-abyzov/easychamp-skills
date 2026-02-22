@@ -135,7 +135,7 @@ from pymongo import MongoClient
 from bson.codec_options import CodecOptions
 from bson.binary import UuidRepresentation
 
-MONGO_URI = "REDACTED_MONGO_URI"
+MONGO_URI = os.environ["EASYCHAMP_MONGO_URI"]  # Set from appsettings.Development.json — NEVER hardcode credentials
 client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
 db = client['Fixtures-db']
 opts = CodecOptions(uuid_representation=UuidRepresentation.STANDARD)
