@@ -289,16 +289,21 @@ news = {
 - [ ] 5. Insert events (goals) into `events` collection
 - [ ] 6. Populate `HomeSquad`/`AwaySquad` in fixture documents
 - [ ] 7. Recalculate standings: `POST /recalculate/champ/{id}/standings`
-- [ ] 8. **Add zero-stat standings entries** for teams without fixtures in this match day
-- [ ] 9. Recalculate player stats (3 calls):
-  - `POST /stage/{stageId}/recalcstageplayerstats`
-  - `POST /champs/{champId}/recalcstageplayerstats`
-  - `POST /champs/{champId}/recalcoverallplayerstats`
-- [ ] 10. Recalculate team stats:
-  - `POST /teams/{teamId}/recalctotalstats` (for each team with fixtures)
-  - `POST /stage/{stageId}/recalcstageuserteamstats`
-- [ ] 11. Create news article in `news` collection
-- [ ] 12. **Verify everything** (see Verification section below)
+- [ ] 8. **Add zero-stat standings entries** for teams without fixtures (⚠️ recalc wipes these every time!)
+- [ ] 9. Recalculate player/team stats (ALL of these, in order):
+  ```bash
+  CHAMP="{champId}" STAGE="{stageId}" LEAGUE="{leagueId}"
+  curl -X POST ".../stage/$STAGE/recalcstageplayerstats"
+  curl -X POST ".../champs/$CHAMP/recalcstageplayerstats"
+  curl -X POST ".../champs/$CHAMP/recalcoverallplayerstats"
+  curl -X POST ".../stage/$STAGE/recalcstageuserteamstats"
+  curl -X POST ".../champ-leagues/$LEAGUE/recalcstageplayerstats"
+  # For each team with fixtures:
+  curl -X POST ".../teams/$TEAM_ID/recalctotalstats"
+  ```
+  ⚠️ **League-level recalc** (`/champ-leagues/{id}/recalcoverallplayerstats`) can take 60s+ — run it but don't wait.
+- [ ] 10. Create news article in `news` collection
+- [ ] 11. **Verify everything** (see Verification section below)
 
 ## Verification Checklist (MANDATORY after every import)
 
@@ -402,8 +407,9 @@ Open these URLs and confirm visually:
 4. **Team ExternalIds** — Existing teams use their NAME as ExternalId.
 5. **Import uses `Teams` not `ChampTeams`** — The swagger shows `teams`, the import model field is `Teams`.
 6. **Group.Fixtures not deserialized** — The import endpoint doesn't process fixtures inside groups.
-7. **Standings recalculation only covers teams with fixtures** — Must manually add entries for teams with 0 games played. Without this, teams appear in "Participants" but NOT in "Standings".
-8. **Dev auth bypass doesn't work** — The middleware uses "Admin" role but the validator checks "Administrator" and "SystemAdmin". Use direct MongoDB writes as workaround.
+7. **Standings recalculation only covers teams with fixtures** — Must manually add entries for teams with 0 games played. Without this, teams appear in "Participants" but NOT in "Standings". **AND**: Every time you re-run standings recalc, it OVERWRITES the Standings array, wiping the zero-stat entries. Always re-add them AFTER recalculation.
+8. **Squads required for "Games" stat** — The stats engine counts "Games Played" from `HomeSquad`/`AwaySquad` entries (where `IsPlayed: true`). If a fixture has empty squads, only scorers (from events) appear in stats. Non-scoring players will be invisible. Always populate squads BEFORE running stats recalculation.
+9. **Dev auth bypass doesn't work** — The middleware uses "Admin" role but the validator checks "Administrator" and "SystemAdmin". Use direct MongoDB writes as workaround.
 9. **UUID representation** — Use `UuidRepresentation.STANDARD` when connecting with pymongo.
 10. **After inserting fixtures, update BOTH group and stage refs** — Missing refs means the fixture won't appear in the schedule.
 11. **Events are queried by `FixtureRef._id`** — The API joins events to fixtures via this field, not via an `EventRefs` array in the fixture document.
