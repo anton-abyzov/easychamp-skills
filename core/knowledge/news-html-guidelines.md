@@ -53,8 +53,7 @@ Use a slightly bold blue that reads on both backgrounds:
 A match day news article should include these sections in order:
 1. **Score card header** — dark gradient with team logos, score, date
 2. **Narrative recap** — 2-3 paragraphs describing the match
-3. **🎥 Game Highlights** — embedded YouTube highlight reel (main video)
-4. **🎬 Full Game** — embedded YouTube full match (secondary video)
+3. **🎬 Full Game** — embedded YouTube full match (the highlights are already rendered by the site from `VideoUrl`, so do NOT embed them again in Description)
 5. **⚽ Goal Scorers** — two-column flex layout with team colors
 6. **📋 Team Lineup** — chip-style player names with new player indicators
 7. **📊 Other Results** — compact score line for other fixtures
@@ -62,8 +61,8 @@ A match day news article should include these sections in order:
 
 ## MongoDB Fields
 - `Description` — the full HTML content (NOT `Content` — that field doesn't exist)
-- `VideoUrl` — the main highlight video URL (shown as thumbnail on news list pages)
-- `ImageUrl` — optional hero image (null if using video thumbnail)
+- `VideoUrl` — the main highlight video URL. The site auto-renders this as a YouTube embed at the top of the article. Do NOT duplicate this embed in Description HTML.
+- `ImageUrl` — **MUST be set** to the YouTube thumbnail for the news list card: `https://img.youtube.com/vi/{VIDEO_ID}/maxresdefault.jpg`. Without this, the news list shows a default logo instead of a video preview.
 - `Title` — article headline
 - `ExternalId` — unique identifier for dedup (e.g., `c108-matchday1-recap`)
 - `IsPublished` — must be `true` to appear publicly
