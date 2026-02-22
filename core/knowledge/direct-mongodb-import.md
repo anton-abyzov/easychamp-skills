@@ -298,7 +298,102 @@ news = {
   - `POST /teams/{teamId}/recalctotalstats` (for each team with fixtures)
   - `POST /stage/{stageId}/recalcstageuserteamstats`
 - [ ] 11. Create news article in `news` collection
-- [ ] 12. Verify: standings, schedule, **stats tabs**, news page
+- [ ] 12. **Verify everything** (see Verification section below)
+
+## Verification Checklist (MANDATORY after every import)
+
+After completing all import steps, verify each of these via the API or website.
+Do NOT skip this — every issue we've had came from missing a verification step.
+
+### 1. Participants Tab
+```bash
+# All teams must appear
+curl -s "http://127.0.0.1:5010/ec-standings-api/champs/{champId}" | python3 -c "
+import sys, json; d=json.loads(sys.stdin.read())
+teams = d.get('teams', d.get('teamRefs', []))
+print(f'Teams: {len(teams)}')
+for t in teams: print(f'  {t.get(\"name\",\"?\")}')
+"
+```
+✅ Expected: All teams in the competition listed (e.g., 6 for C108)
+
+### 2. Standings Tab
+```bash
+curl -s "http://127.0.0.1:5010/ec-standings-api/champs/{champId}/standings" | python3 -c "
+import sys, json; d=json.loads(sys.stdin.read())
+for stage in d.get('stages', []):
+  for group in stage.get('groups', []):
+    standings = group.get('standings', [])
+    print(f'Teams in standings: {len(standings)}')
+    for s in standings:
+      t = s.get('team', {})
+      print(f'  {s[\"place\"]}. {t.get(\"name\",\"?\")} P:{s[\"played\"]} GF:{s[\"totalScored\"]} GA:{s[\"totalConceded\"]} Pts:{s[\"scores\"]}')
+"
+```
+✅ Expected: **ALL group teams** appear (including those with 0 games)
+✅ Expected: Points correct (W=3, D=1, L=0)
+✅ Expected: GF/GA match fixture scores
+
+### 3. Schedule Tab
+```bash
+curl -s "http://127.0.0.1:5010/ec-standings-api/fixture/champ/{champId}" | python3 -c "
+import sys, json; d=json.loads(sys.stdin.read())
+for f in d:
+    home = f.get('homeTeam',{}).get('name','?')
+    away = f.get('awayTeam',{}).get('name','?')
+    print(f'MD{f.get(\"matchDay\",\"?\")} {home} {f.get(\"homeTeamScore\",\"?\")} - {f.get(\"awayTeamScore\",\"?\")} {away} | events:{len(f.get(\"events\",[]))}')
+"
+```
+✅ Expected: All fixtures listed with correct scores
+✅ Expected: Match day numbers correct
+
+### 4. Stats Tab (Player Stats)
+```bash
+curl -s "http://127.0.0.1:5010/ec-standings-api/champs/{champId}/stats?pageSize=20" | python3 -c "
+import sys, json; d=json.loads(sys.stdin.read())
+for item in d.get('items', []):
+    player = item.get('playerRef', {}).get('fullName', '?')
+    stats = {s['name']: s['value'] for s in item.get('allStats', [])}
+    print(f'  {player}: {stats.get(\"Goals\",0)} goals, {stats.get(\"Games\",0)} games')
+"
+```
+✅ Expected: All scorers appear with correct goal tallies
+✅ Expected: Games played = number of fixtures they appeared in
+
+### 5. Events per Fixture
+```bash
+# Check each fixture individually
+curl -s "http://127.0.0.1:5010/ec-standings-api/fixture/{fixtureId}/events" | python3 -c "
+import sys, json; d=json.loads(sys.stdin.read())
+items = d.get('items', [])
+print(f'Events: {len(items)}')
+home = [e for e in items if e.get('isHomeEvent')]
+away = [e for e in items if not e.get('isHomeEvent')]
+print(f'Home goals: {len(home)}, Away goals: {len(away)}')
+for e in items:
+    side = 'HOME' if e.get('isHomeEvent') else 'AWAY'
+    print(f'  [{side}] {e.get(\"player\",{}).get(\"fullName\",\"?\")}')
+"
+```
+✅ Expected: Event count matches score (home events = home score, away events = away score)
+
+### 6. News
+```bash
+curl -s "http://127.0.0.1:5010/ec-standings-api/news?champLeagueId={leagueId}&pageSize=5" | python3 -c "
+import sys, json; d=json.loads(sys.stdin.read())
+for n in d.get('items', []):
+    print(f'{n.get(\"title\",\"?\")} | published: {n.get(\"isPublished\")}')
+"
+```
+✅ Expected: New article appears, `isPublished: true`
+
+### 7. Website Visual Check
+Open these URLs and confirm visually:
+- `https://easychamp.com/observe/competition/{champId}?tabs=participants` — all teams with logos
+- `https://easychamp.com/observe/competition/{champId}?tabs=standings` — full table, all teams
+- `https://easychamp.com/observe/competition/{champId}?tabs=schedule` — fixtures with scores
+- `https://easychamp.com/observe/competition/{champId}?tabs=stats` — player stats (goals, games)
+- `https://easychamp.com/observe/league/{leagueId}?tabs=news` — news article visible
 
 ## Common Pitfalls
 1. **Minute must be STRING** — `"0"` not `0`. Causes `BsonType deserialization error`.
