@@ -19,9 +19,11 @@ Connection string is in `appsettings.Development.json`.
 | `groups` | Groups within a stage | `_id`, `TeamRefs[]`, `FixtureRefs[]`, `StageRef`, `ChampRef` |
 | `fixtures` | Match results | `_id`, `HomeTeam`, `AwayTeam`, `HomeTeamScore`, `AwayTeamScore`, `Status`, `HomeSquad[]`, `AwaySquad[]` |
 | `events` | Goals, cards, etc | `_id`, `EventType`, `PlayerRef`, `FixtureRef`, `IsHomeEvent`, `ChampTeamPlayerId`, `Minute` (STRING!) |
+| `champGroupStandings` | Group standings (computed) | `_id`, `Standings[]`, `GroupRef`, `ChampRef`, `StageRef` |
 | `champTeamPlayers` | Player registrations per champ | `_id`, `Player`, `ChampTeamId`, `ChampRef` |
 | `players` | Global player records | `_id`, `FullName`, `ExternalId` |
 | `teams` | Global team records | `_id`, `Name`, `ExternalId`, `ImageUrl` |
+| `news` | News articles | `_id`, `Title`, `Description` (HTML), `Categories[]`, `IsPublished` |
 
 ### ID Format
 All IDs are **string GUIDs** (not BSON ObjectId). Use `str(uuid.uuid4())` for new records.
@@ -34,6 +36,19 @@ Documents use embedded "Ref" objects, NOT foreign key IDs:
   "ChampLeagueRef": {"_id": "guid-here", "Version": 0, "Name": "League Name"}
 }
 ```
+
+## Running the Local API
+
+```bash
+cd /Users/antonabyzov/Projects/sw-easychamp/repositories/ec-standings-api
+dotnet run --project ec-standings-api --no-launch-profile \
+  --urls "http://0.0.0.0:5010" 2>&1 | tee /tmp/ec-standings-api.log &
+```
+
+Environment: `ASPNETCORE_ENVIRONMENT=Development` (auto from `launchSettings.json`).
+Base URL: `http://127.0.0.1:5010/ec-standings-api/`
+
+**Note**: The API connects to PRODUCTION MongoDB. All changes are live immediately.
 
 ## Step-by-Step: Creating a New Competition
 
@@ -93,6 +108,22 @@ curl -s -X PUT "http://127.0.0.1:5010/ec-standings-api/stage/{stageId}" \
 ```
 
 ### Phase 3: Create Fixtures via MongoDB
+
+```python
+from pymongo import MongoClient
+from bson.codec_options import CodecOptions
+from bson.binary import UuidRepresentation
+import uuid
+from datetime import datetime, timezone
+
+MONGO_URI = "REDACTED_MONGO_URI"
+client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
+db = client['Fixtures-db']
+opts = CodecOptions(uuid_representation=UuidRepresentation.STANDARD)
+# Get collection: db.get_collection('fixtures', codec_options=opts)
+```
+
+Fixture document:
 ```python
 fixture = {
     "_id": str(uuid.uuid4()),
@@ -100,20 +131,24 @@ fixture = {
     "AddedAtUtc": now,
     "UpdatedAtUtc": now,
     "CreatedBy": "IntegrationWorker",
+    "UpdatedBy": "IntegrationWorker",
     "ExternalId": "unique-fixture-id",
     "Date": datetime(2026, 2, 17, 5, 0, 0),
-    "HomeTeamScore": "3",   # STRING!
-    "AwayTeamScore": "1",   # STRING!
+    "HomeTeamScore": "3",   # ⚠️ STRING!
+    "AwayTeamScore": "1",   # ⚠️ STRING!
     "Status": 2,            # 2 = Finished
     "MatchDay": 1,
-    "MatchDayName": "1",    # STRING!
-    "HomeTeam": make_team_ref("Team Name"),  # Full embedded object
-    "AwayTeam": make_team_ref("Other Team"),
+    "MatchDayName": "1",    # ⚠️ STRING!
+    "HomeTeam": {            # Full embedded TeamRef
+        "_id": "team-guid", "Version": 0, "Name": "Team Name",
+        "ImageUrl": "...", "IsInternational": False, "ChampTeamId": "champ-team-guid"
+    },
+    "AwayTeam": { ... },     # Same structure
     "GroupRef": {"_id": "group-guid", "Version": 0},
     "StageRef": {"_id": "stage-guid", "Version": 0, "Name": "Group Stage"},
     "ChampRef": {"_id": "champ-guid", "Version": 0, "Name": "Champ Name"},
-    "ChampLeagueRef": league_ref,
-    "HomeSquad": [],  # Squad entries from ChampTeamPlayers
+    "ChampLeagueRef": { ... },
+    "HomeSquad": [],         # Player entries from ChampTeamPlayers
     "AwaySquad": [],
     "RefereeRefs": [],
     "IsImportCompleted": True,
@@ -121,65 +156,155 @@ fixture = {
 }
 ```
 
-**After inserting fixtures**, update refs:
+**After inserting fixtures**, update refs in group AND stage:
 ```python
 # Update group
-groups_coll.update_one({"_id": GROUP_ID}, {"$set": {"FixtureRefs": [{"_id": fix_id, "Version": 0}]}})
+groups_coll.update_one({"_id": GROUP_ID}, {"$set": {"FixtureRefs": fixture_refs_list}})
 # Update stage
-stages_coll.update_one({"_id": STAGE_ID}, {"$set": {"FixturesRefs": [{"_id": fix_id, "Version": 0}]}})
+stages_coll.update_one({"_id": STAGE_ID}, {"$set": {"FixturesRefs": fixture_refs_list}})
+# Each ref: {"_id": fixture_id, "Version": 0}
 ```
 
 ### Phase 4: Recalculate Standings
 ```bash
 curl -X POST "http://127.0.0.1:5010/ec-standings-api/recalculate/champ/{champId}/standings"
 ```
-This is **critical** — standings are NOT auto-calculated from MongoDB inserts. The API must recalculate them.
+
+**⚠️ CRITICAL**: This endpoint only creates standings entries for teams that appear in fixtures.
+Teams with no fixtures (e.g., bye week) will be MISSING from the standings table.
+
+**Fix**: After recalculation, manually add zero-stat entries to `champGroupStandings.Standings[]`
+for any teams in the group that don't have fixtures yet:
+
+```python
+# Standing entry structure for a team with 0 games:
+zero_standing = {
+    "Place": 5,  # After all teams with games
+    "Scores": 0, "Played": 0, "Win": 0, "Draw": 0, "Lose": 0,
+    "TotalScored": 0, "TotalConceded": 0,
+    "PersonalScores": 0, "PersonalScored": 0, "PersonalConceded": 0,
+    "PersonalAwayGoals": 0,
+    "ChampTeam": {
+        "_id": "team-id",          # From champ.TeamRefs[]._id
+        "Version": 0,
+        "Name": "Team Name",
+        "OwnerId": "owner-guid",
+        "SportKind": None, "League": None, "TeamShortName": None,
+        "IsInternational": False,
+        "ImageUrl": "https://...",
+        "IsVirtual": False,
+        "ChampTeamId": "champ-team-id"  # From champ.TeamRefs[].ChampTeamId
+    },
+    "LastFixtureResults": []
+}
+# Push to standings:
+cgs.update_one({"ChampRef._id": champ_id}, {"$push": {"Standings": {"$each": [zero_standing]}}})
+```
 
 ### Phase 5: Create Events (Goals)
 ```python
 event = {
     "_id": str(uuid.uuid4()),
-    "Minute": "0",          # STRING, not int!
+    "Version": 0,
+    "AddedAtUtc": now,
+    "UpdatedAtUtc": now,
+    "CreatedBy": "IntegrationWorker",
+    "UpdatedBy": "IntegrationWorker",
+    "ExternalId": str(uuid.uuid4())[:8],
+    "Minute": "0",          # ⚠️ STRING, not int!
     "EventType": "scorer",
+    "VARRefereeDecision": None,
     "Type": 2,               # Goal
-    "Points": 1,
-    "IsHomeEvent": True,
+    "Value": None,
+    "Note": None,
+    "Description": None,
+    "BodyPart": None,
+    "GoalType": None,
     "FixtureRef": {"_id": fixture_id, "Version": 0},
     "ChampRef": {"_id": champ_id, "Version": 0, "Name": "..."},
-    "ChampLeagueRef": league_ref,
+    "ChampLeagueRef": league_ref,   # Copy from champ document
     "PlayerRef": {"_id": player_id, "Version": 0, "FullName": "Player Name"},
-    "ChampTeamPlayerId": "ctp-guid",
-    # ... other fields
+    "AssistantPlayerRef": None,
+    "ChampTeamPlayerId": "ctp-guid", # From champTeamPlayers._id
+    "ChampTeamPlayerAssistantId": None,
+    "IsHomeEvent": True,             # True = home team scorer
+    "Points": 1
 }
 ```
 
-### Phase 6: Create News
+**Finding CTP (ChampTeamPlayer) IDs**: Query `champTeamPlayers` by `ChampRef._id` and `Player.FullName`.
+
+### Phase 6: Create News Article
+
+News is stored in the `news` collection:
 ```python
 news = {
     "_id": str(uuid.uuid4()),
-    "Title": "Match Day 1: ...",
-    "Description": "<html content>",
-    "ContentType": 1,
+    "Version": 0,
+    "AddedAtUtc": now,
+    "UpdatedAtUtc": now,
+    "CreatedBy": "IntegrationWorker",
+    "ExternalId": "c108-matchday1-recap",
+    "Title": "Match Day 1: EasyChamp Falls 4-5 in Thriller",
+    "Description": "<html content here>",  # Rich HTML with inline styles
+    "ContentType": 1,                       # 1 = Article
     "IsPublic": True,
     "IsPublished": True,
     "Categories": [
-        {"EntityId": champ_id, "Type": 0},
-        {"EntityId": league_id, "Type": 2}
+        {"EntityId": champ_id, "Type": 0},   # 0 = Champ category
+        {"EntityId": league_id, "Type": 2}    # 2 = League category
     ],
-    "SportKindRef": {"_id": "05684792-9662-4e9f-a163-8545e5736c3d", "Version": 0, "Name": "Soccer"},
-    "Date": datetime(2026, 2, 17),
+    "SportKindRef": {
+        "_id": "05684792-9662-4e9f-a163-8545e5736c3d",
+        "Version": 0,
+        "Name": "Soccer"
+    },
+    "Keywords": ["EasyChamp", "PS23", "match report"],
+    "ImageUrl": None,               # Or "News/filename.png" for uploaded images
+    "ImageInitialFileName": None,
+    "ImageContentType": None,
+    "Date": datetime(2026, 2, 17)   # Match date
 }
 ```
 
+**News HTML Style Guide** (matches existing articles):
+- Use **inline CSS** only (no external stylesheets)
+- Dark gradient header with team logos, score, and match info
+- Body text: `font-size:15px; line-height:1.7; color:#333`
+- Section headers: `font-size:22px; color:#1a1a2e`
+- Tag pills: `background:#315FD3; color:white; border-radius:20px`
+- YouTube embed: responsive iframe with `padding-bottom:56.25%`
+- Goal scorers in colored cards: blue for home (`#f0f4ff`), red for away (`#fff5f5`)
+- Lineup as pill badges
+- "Stats powered by EasyChamp" footer link
+
+**Categories Type values**: `0` = Champ, `2` = League (champLeague)
+
+## Complete Checklist for Match Day Import
+
+- [ ] 1. Create/update competition via `/import/league` (teams, players, stages)
+- [ ] 2. Create group via `PUT /stage/{id}` with all teams
+- [ ] 3. Insert fixtures into MongoDB `fixtures` collection
+- [ ] 4. Update `groups.FixtureRefs` and `stages.FixturesRefs` with new fixture IDs
+- [ ] 5. Insert events (goals) into `events` collection
+- [ ] 6. Populate `HomeSquad`/`AwaySquad` in fixture documents
+- [ ] 7. Recalculate standings: `POST /recalculate/champ/{id}/standings`
+- [ ] 8. **Add zero-stat standings entries** for teams without fixtures in this match day
+- [ ] 9. Create news article in `news` collection
+- [ ] 10. Verify: standings, schedule, stats tabs, news page
+
 ## Common Pitfalls
-1. **Minute must be STRING** — `"0"` not `0`. Causes BsonType deserialization error.
+1. **Minute must be STRING** — `"0"` not `0`. Causes `BsonType deserialization error`.
 2. **Scores must be STRING** — `"3"` not `3`.
-3. **Team ExternalIds** — Existing teams use their NAME as ExternalId.
-4. **Import uses `Teams` not `ChampTeams`** — The swagger shows `teams`, the import model field is `Teams`.
-5. **Group.Fixtures not deserialized** — The import endpoint doesn't process fixtures inside groups.
-6. **After MongoDB inserts, recalculate standings** — `POST /recalculate/champ/{id}/standings`
-7. **Dev auth bypass** — The middleware uses "Admin" role but the validator checks "Administrator" and "SystemAdmin".
-8. **UUID representation** — Use `UuidRepresentation.STANDARD` when connecting with pymongo.
+3. **MatchDayName must be STRING** — `"1"` not `1`.
+4. **Team ExternalIds** — Existing teams use their NAME as ExternalId.
+5. **Import uses `Teams` not `ChampTeams`** — The swagger shows `teams`, the import model field is `Teams`.
+6. **Group.Fixtures not deserialized** — The import endpoint doesn't process fixtures inside groups.
+7. **Standings recalculation only covers teams with fixtures** — Must manually add entries for teams with 0 games played. Without this, teams appear in "Participants" but NOT in "Standings".
+8. **Dev auth bypass doesn't work** — The middleware uses "Admin" role but the validator checks "Administrator" and "SystemAdmin". Use direct MongoDB writes as workaround.
+9. **UUID representation** — Use `UuidRepresentation.STANDARD` when connecting with pymongo.
+10. **After inserting fixtures, update BOTH group and stage refs** — Missing refs means the fixture won't appear in the schedule.
+11. **Events are queried by `FixtureRef._id`** — The API joins events to fixtures via this field, not via an `EventRefs` array in the fixture document.
 
 ## Key IDs for PS23 Soccer League
 - **League**: `8f541539-9752-4d5b-a39d-78361dedf092`
@@ -196,3 +321,16 @@ news = {
 | Miami All Stars | bf3120e4-1fd9-4509-b291-c2f10243dde3 | Miami All Stars |
 | 3 Toques FC | 63b362f7-b588-46c9-8394-af06fb8f44da | 3 Toques FC |
 | Junior Miami | f13d3871-d9f4-44ae-86d9-fef445ab3f65 | Junior Miami |
+
+## C108 Specific IDs
+| Entity | ID |
+|---|---|
+| Champ | `d68923ad-ba22-4a6e-8926-783d08776eb9` |
+| Stage (Group Stage) | `26ff1eab-62ef-407d-b4c3-0f93d8d48c88` |
+| Group A | `5024e219-a180-47a7-8865-3dbaf24051d0` |
+| ChampTeam: EasyChamp | `80ee3f85-c673-401d-8aba-865698800676` |
+| ChampTeam: #10 FC | `466a9951-0dc3-471d-a6e9-53235c3aefec` |
+| ChampTeam: Miami All Stars | `e3f69feb-24e5-4a19-b280-c01469893d0a` |
+| ChampTeam: Atenas Pocito | `f5d955cb-9ed9-4e05-81b4-243611669e7d` |
+| ChampTeam: 3 Toques FC | `8bf6b65b-f67e-4a73-879e-c30344bca4be` |
+| ChampTeam: Junior Miami | `e1ec0dd3-92c4-42b4-a1f2-7d100bb81c20` |
