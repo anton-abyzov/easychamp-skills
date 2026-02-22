@@ -335,12 +335,43 @@ print(f'Events: {len(items)} (Home:{home} Away:{away})')"
 | 3 Toques FC | 63b362f7-b588-46c9-8394-af06fb8f44da | 3 Toques FC |
 | Junior Miami | f13d3871-d9f4-44ae-86d9-fef445ab3f65 | Junior Miami |
 
-## News HTML Style Guide
-- Use **inline CSS** only (no external stylesheets)
-- Dark gradient header: `background:linear-gradient(135deg,#0a0a2e 0%,#161640 40%,#0d0d35 100%)`
-- Body text: `font-size:15px; line-height:1.7; color:#333`
-- Section headers: `font-size:22px; color:#1a1a2e`
-- Tag pills: `background:#315FD3; color:white; border-radius:20px`
-- YouTube embed: responsive iframe with `padding-bottom:56.25%`
-- Goal scorers in colored cards: blue for home (`#f0f4ff`), red for away (`#fff5f5`)
-- Footer: "Stats powered by EasyChamp" with link to league subdomain
+## News Article Guide
+
+### VideoUrl Field
+Set the `VideoUrl` field on the news document to the game highlights YouTube URL (e.g., `https://youtu.be/UZmmD6TzHDA`). EasyChamp uses this as the news thumbnail/preview. **Always set this when highlights are available** — it's better than a blank image.
+
+```python
+news["VideoUrl"] = "https://youtu.be/VIDEO_ID"  # Highlights URL
+```
+
+### HTML Style Guide (Light + Dark Theme Compatible)
+
+⚠️ **CRITICAL: Use `color:inherit` for all text, NEVER hardcoded dark colors like `#333` or `#1a1a2e`.**
+The EasyChamp website supports light and dark themes. Hardcoded dark text colors become invisible on dark backgrounds.
+
+**Rules:**
+- **All text**: `color:inherit` (inherits from theme)
+- **Reduced emphasis text**: `color:inherit;opacity:0.85` (body), `opacity:0.5` (captions)
+- **Backgrounds**: Use `rgba()` with low alpha, NOT solid colors like `#f0f4ff` — those look wrong on dark theme
+  - Scorer cards: `background:rgba(49,95,211,0.12)` (blue), `background:rgba(211,47,47,0.12)` (red)
+  - Neutral sections: `background:rgba(128,128,128,0.1)`
+  - Borders: `border:1px solid rgba(128,128,128,0.2)`
+- **Links**: `color:#5b8af5` (works on both themes)
+- **Accent text** (team headers): `color:#315FD3` (blue) or `color:#d32f2f` (red) — these are bright enough for both
+- **Header banner**: Dark gradient is fine — it's self-contained with white text
+- **YouTube embed**: responsive iframe `padding-bottom:56.25%`
+- **Section title**: Change "Full Game" to "Game Highlights" when using highlights URL
+
+**DON'T use:**
+- `color:#333` — invisible on dark theme ❌
+- `color:#1a1a2e` — invisible on dark theme ❌
+- `background:#f0f4ff` — looks jarring on dark theme ❌
+- `background:#fff5f5` — looks jarring on dark theme ❌
+- `background:white` — breaks dark theme ❌
+- `border:1px solid #ddd` — barely visible on dark theme ❌
+
+**DO use:**
+- `color:inherit` — adapts to theme ✅
+- `color:inherit;opacity:0.85` — subtle body text ✅
+- `background:rgba(128,128,128,0.1)` — theme-neutral ✅
+- `border:1px solid rgba(128,128,128,0.2)` — works on both ✅
