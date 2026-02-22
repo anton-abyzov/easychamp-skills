@@ -115,10 +115,12 @@ Base URL: `http://127.0.0.1:5010/ec-standings-api/`
 
 ### Step 1: Import via API
 ```bash
-curl -s -X POST "http://127.0.0.1:5010/ec-standings-api/import/league" \
+curl -s -X POST "http://127.0.0.1:5010/ec-standings-api/import/league?ownerId=37f8d338-a9e8-45f1-9efe-477575f155c5" \
   -H "Content-Type: application/json" \
   -d @import.json
 ```
+
+⚠️ **CRITICAL: Always pass `ownerId`!** Without it, the import uses `ImportConstants.DefaultOwnerId` which creates duplicate teams and assigns the wrong manager. For PS23 Soccer League, the owner is `37f8d338-a9e8-45f1-9efe-477575f155c5` (anton.abyzov@gmail.com).
 
 Expected response: `{"success":true,"message":"League imported successfully","champsImported":1}`
 
@@ -300,6 +302,8 @@ print(f'Events: {len(items)} (Home:{home} Away:{away})')"
 9. **News with HTML** — Import validation requires non-empty `Body`/`Description`. Easier to insert directly into MongoDB.
 10. **UUID representation** — Use `UuidRepresentation.STANDARD` when connecting with pymongo
 11. **`fixturesProcessed: 0` in response** — This is misleading. Fixtures ARE processed; the counter just doesn't track them.
+12. **Always pass `ownerId` query parameter** — Without it, import uses `ImportConstants.DefaultOwnerId` (`f9fe7636...`) which creates duplicate teams and assigns wrong ManagerIds. The champ won't appear under the correct league on the website.
+13. **Clean up duplicate teams** after failed imports — Check `db.teams.find({Name: "TeamName"})` for duplicates. Keep the one with the correct OwnerId.
 
 ## Key IDs for PS23 Soccer League
 - **League**: `8f541539-9752-4d5b-a39d-78361dedf092`
