@@ -50,7 +50,15 @@ Base URL: `http://127.0.0.1:5010/ec-standings-api/`
 
 **Note**: The API connects to PRODUCTION MongoDB. All changes are live immediately.
 
-## Step-by-Step: Creating a New Competition
+## Proven End-to-End Workflow (Tested 2026-02-22)
+
+This workflow was validated by deleting C108 and re-creating from scratch. Every step is confirmed working.
+
+**What the import endpoint handles:** League, Champ, Teams (with ExternalId matching), Players/CTPs, Stage, Group (with teamIds). It also creates an empty `champGroupStandings` document.
+
+**What must be done via MongoDB:** Fixtures, Squads, Events, News (with HTML body).
+
+**What must be recalculated via API:** Standings, Player Stats, Team Stats. Then zero-stat standings entries must be added for teams without fixtures.
 
 ### Phase 1: Import via API (handles teams + players + champ)
 ```bash
@@ -430,15 +438,17 @@ Open these URLs and confirm visually:
 | 3 Toques FC | 63b362f7-b588-46c9-8394-af06fb8f44da | 3 Toques FC |
 | Junior Miami | f13d3871-d9f4-44ae-86d9-fef445ab3f65 | Junior Miami |
 
-## C108 Specific IDs
+## C108 Specific IDs (Re-imported 2026-02-22)
 | Entity | ID |
 |---|---|
-| Champ | `d68923ad-ba22-4a6e-8926-783d08776eb9` |
-| Stage (Group Stage) | `26ff1eab-62ef-407d-b4c3-0f93d8d48c88` |
-| Group A | `5024e219-a180-47a7-8865-3dbaf24051d0` |
-| ChampTeam: EasyChamp | `80ee3f85-c673-401d-8aba-865698800676` |
-| ChampTeam: #10 FC | `466a9951-0dc3-471d-a6e9-53235c3aefec` |
-| ChampTeam: Miami All Stars | `e3f69feb-24e5-4a19-b280-c01469893d0a` |
-| ChampTeam: Atenas Pocito | `f5d955cb-9ed9-4e05-81b4-243611669e7d` |
-| ChampTeam: 3 Toques FC | `8bf6b65b-f67e-4a73-879e-c30344bca4be` |
-| ChampTeam: Junior Miami | `e1ec0dd3-92c4-42b4-a1f2-7d100bb81c20` |
+| Champ | `3f4ae5f9-55ca-4f64-8e17-cdf80d8c0231` |
+| Stage (Group Stage) | `6e89cd49-7743-4270-8b2b-e13220cd2586` |
+| Group A | `a3f2f9a1-20fe-48bd-933c-0b7a7073bda9` |
+| ChampTeam: EasyChamp | `3cdc478e-7671-405c-9933-a5d8af9e27fd` |
+| ChampTeam: #10 FC | `b6dc027a-5477-4d45-970f-963a24f8c94b` |
+| ChampTeam: Miami All Stars | `569aaa76-6d86-462e-8a1f-de871872da52` |
+| ChampTeam: Atenas Pocito | `db90f405-3d98-4430-bc8d-36f4e8868f9a` |
+| ChampTeam: 3 Toques FC | `6e1603e1-3660-401d-a94d-76a50cd2256d` |
+| ChampTeam: Junior Miami | `380271be-5628-4430-af3f-6b754fc70c99` |
+
+**Note**: ChampTeamIds change every time you re-import. Always query fresh after import.
