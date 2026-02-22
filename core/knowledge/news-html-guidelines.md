@@ -62,7 +62,7 @@ A match day news article should include these sections in order:
 ## MongoDB Fields
 - `Description` — the full HTML content (NOT `Content` — that field doesn't exist)
 - `VideoUrl` — the main highlight video URL. The site auto-renders this as a YouTube embed at the top of the article. Do NOT duplicate this embed in Description HTML.
-- `ImageUrl` — **MUST be set** to the YouTube thumbnail for the news list card: `https://img.youtube.com/vi/{VIDEO_ID}/maxresdefault.jpg`. Without this, the news list shows a default logo instead of a video preview.
+- `ImageUrl` — Leave as `null` when `VideoUrl` is set. The Web Engine (subdomain site like `ps23soccer.at.easychamp.com`) uses `VideoUrl` directly and makes it clickable. The main EasyChamp site (`easychamp.com`) news list may show a default icon when `ImageUrl` is null, but setting `ImageUrl` causes a blank hero gap on the detail page — so keep it null. Setting it to a YouTube thumbnail causes rendering issues on the detail page.
 - `Title` — article headline
 - `ExternalId` — unique identifier for dedup (e.g., `c108-matchday1-recap`)
 - `IsPublished` — must be `true` to appear publicly
