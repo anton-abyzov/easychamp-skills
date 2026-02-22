@@ -290,8 +290,15 @@ news = {
 - [ ] 6. Populate `HomeSquad`/`AwaySquad` in fixture documents
 - [ ] 7. Recalculate standings: `POST /recalculate/champ/{id}/standings`
 - [ ] 8. **Add zero-stat standings entries** for teams without fixtures in this match day
-- [ ] 9. Create news article in `news` collection
-- [ ] 10. Verify: standings, schedule, stats tabs, news page
+- [ ] 9. Recalculate player stats (3 calls):
+  - `POST /stage/{stageId}/recalcstageplayerstats`
+  - `POST /champs/{champId}/recalcstageplayerstats`
+  - `POST /champs/{champId}/recalcoverallplayerstats`
+- [ ] 10. Recalculate team stats:
+  - `POST /teams/{teamId}/recalctotalstats` (for each team with fixtures)
+  - `POST /stage/{stageId}/recalcstageuserteamstats`
+- [ ] 11. Create news article in `news` collection
+- [ ] 12. Verify: standings, schedule, **stats tabs**, news page
 
 ## Common Pitfalls
 1. **Minute must be STRING** — `"0"` not `0`. Causes `BsonType deserialization error`.
