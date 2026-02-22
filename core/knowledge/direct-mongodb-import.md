@@ -230,6 +230,19 @@ print(f"Deleted {r.deleted_count} from champs")
 
 **NOT cleaned** (shared data): teams, players, champLeagues. These are reused across competitions.
 
+**⚠️ CRITICAL: Clean up player histories after deletion!**
+The import adds history entries with `appendHistory: true`. Deleting the champ doesn't remove them.
+
+```python
+# Remove history entries pointing to deleted champ(s)
+DEAD_CHAMPS = ["champ-id-1", "champ-id-2"]  # All deleted champ IDs
+players = db.get_collection('players', codec_options=opts)
+for p in players.find({"History.ChampId": {"$in": DEAD_CHAMPS}}):
+    clean = [h for h in p.get('History', []) if h.get('ChampId') not in DEAD_CHAMPS]
+    players.update_one({"_id": p['_id']}, {"$set": {"History": clean}})
+    print(f"  {p.get('FullName','?')}: {len(p['History'])} -> {len(clean)}")
+```
+
 ## Verification Checklist (MANDATORY after every import)
 
 ### 1. Participants
@@ -304,6 +317,7 @@ print(f'Events: {len(items)} (Home:{home} Away:{away})')"
 11. **`fixturesProcessed: 0` in response** — This is misleading. Fixtures ARE processed; the counter just doesn't track them.
 12. **Always pass `ownerId` query parameter** — Without it, import uses `ImportConstants.DefaultOwnerId` (`f9fe7636...`) which creates duplicate teams and assigns wrong ManagerIds. The champ won't appear under the correct league on the website.
 13. **Clean up duplicate teams** after failed imports — Check `db.teams.find({Name: "TeamName"})` for duplicates. Keep the one with the correct OwnerId.
+14. **Player history duplicates on reimport** — The import calls `AddManyHistoryAsync` with `appendHistory: true`, adding a new history entry EVERY time. If you reimport a champ multiple times, players get duplicate history entries. **Must clean up player History[] after deleting a champ** (see Deletion procedure below).
 
 ## Key IDs for PS23 Soccer League
 - **League**: `8f541539-9752-4d5b-a39d-78361dedf092`
