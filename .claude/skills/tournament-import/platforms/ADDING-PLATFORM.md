@@ -1,13 +1,12 @@
-# Adding a New Platform to EasyChamp Skills
+# Adding a New Platform
 
-This guide walks through creating a new platform plugin for importing tournament
-data from a new source website into EasyChamp.
+Guide for adding support for a new sports website to the tournament-import skill.
 
 ## Step 1: Create the directory structure
 
 ```bash
-mkdir -p platforms/{platform-name}/knowledge
-mkdir -p platforms/{platform-name}/scripts
+# From the skill root (.claude/skills/tournament-import/)
+mkdir -p platforms/{platform-name}
 ```
 
 ## Step 2: Analyze the source website
@@ -22,9 +21,9 @@ Before writing any code, document:
 6. **Are there playoffs/brackets?** (how are knockout stages identified?)
 7. **Any quirks?** (duplicate data, missing fields, inconsistent naming)
 
-## Step 3: Create the platform knowledge doc
+## Step 3: Create the platform guide
 
-Create `platforms/{platform-name}/knowledge/platform-guide.md`:
+Create `platforms/{platform-name}/guide.md`:
 
 ```markdown
 # {Platform Name} - Import Guide
@@ -45,7 +44,6 @@ Create `platforms/{platform-name}/knowledge/platform-guide.md`:
 | team_name | HomeTeam.Name / AwayTeam.Name | |
 | score | HomeTeamScore / AwayTeamScore | Must be strings |
 | round | MatchDay / MatchDayName | |
-| ... | ... | |
 
 ## Logo URL Pattern
 {How to construct logo URLs from team data}
@@ -59,7 +57,7 @@ Create `platforms/{platform-name}/knowledge/platform-guide.md`:
 
 ## Step 4: Create the parser script
 
-Create `platforms/{platform-name}/scripts/parse.py`:
+Create `platforms/{platform-name}/parse.py`:
 
 ```python
 #!/usr/bin/env python3
@@ -71,17 +69,13 @@ Usage:
 """
 
 import json
-import sys
 import argparse
-from pathlib import Path
 
 PREFIX = "{platform-name}"  # Used in ExternalId generation
 
 
 def parse(data, sport="Soccer"):
     """Parse {platform} data into EasyChamp import format."""
-    # TODO: Implement parsing logic
-    #
     # Output MUST match this structure:
     # {
     #   "ImportSource": 99,
@@ -107,7 +101,7 @@ def parse(data, sport="Soccer"):
     #   }
     # }
     #
-    # CRITICAL RULES (see core/knowledge/common-pitfalls.md):
+    # CRITICAL RULES (see core/common-pitfalls.md):
     # - Scores MUST be strings: "5" not 5
     # - EventType MUST be "scorer" not "goal"
     # - MatchDayName for playoffs MUST be lowercase: "quarterfinal"
@@ -133,76 +127,33 @@ def main():
         json.dump(result, f, indent=2, ensure_ascii=False)
 
     print(f"Output: {args.output}")
-    print(f"Next: python ../../core/scripts/validate_import.py {args.output}")
+    print(f"Next: python scripts/validate_import.py {args.output}")
 
 
 if __name__ == "__main__":
     main()
 ```
 
-## Step 5: Create the skill file
+## Step 5: Update the SKILL.md
 
-Create `.claude/commands/import-{platform-name}.md`:
+Add a new "PLATFORM: {Name}" section to the main `SKILL.md` with:
+- Platform-specific workflow commands
+- Scorer/data parsing rules
+- Logo URL patterns
+- ExternalId generation scheme
+- Platform-specific gotchas
+- Reimport strategy
 
-```markdown
-# {Platform Name} Import
-
-Platform skill for importing tournament data from {Platform Name} into EasyChamp.
-
-## AGENT DEFINITION
-
-\```yaml
-agent:
-  name: {Platform Name} Importer
-  id: import-{platform-name}
-  title: {Platform Name} Tournament Data Importer
-  whenToUse: >
-    Use when importing tournament data from {Platform Name}.
-    Outputs standard EasyChamp import JSON.
-
-commands:
-  - help: Show commands
-  - parse {file}: Parse {platform} data into EasyChamp import format
-  - scrape {url}: Scrape tournament data from {platform} URL
-
-dependencies:
-  core_skill: tournament-import.md
-  knowledge:
-    - platforms/{platform-name}/knowledge/platform-guide.md
-  scripts:
-    - platforms/{platform-name}/scripts/parse.py
-\```
-
----
-
-## WORKFLOW
-
-\```
-1. Get data: {describe how to get data}
-2. Parse:    python platforms/{platform-name}/scripts/parse.py --input data.json --output import.json
-3. Validate: python core/scripts/validate_import.py import.json --strict
-4. Import:   curl -X POST https://api.easychamp.com/import/league -d @import.json
-5. Verify:   python core/scripts/fix_post_import.py verify --champ-id {id}
-\```
-
-## DATA FORMAT
-{Document the source data format}
-
-## FIELD MAPPING
-{Document how source fields map to EasyChamp fields}
-
-## PLATFORM-SPECIFIC GOTCHAS
-{Document quirks discovered during implementation}
-```
+Use the existing PS23 Soccer section as a template.
 
 ## Step 6: Test
 
 ```bash
 # Parse source data
-python platforms/{platform-name}/scripts/parse.py --input sample.json --output import.json
+python platforms/{platform-name}/parse.py --input sample.json --output import.json
 
 # Validate output
-python core/scripts/validate_import.py import.json --strict
+python scripts/validate_import.py import.json --strict
 
 # If validation passes, import
 curl -X POST https://api.easychamp.com/import/league \
@@ -213,8 +164,8 @@ curl -X POST https://api.easychamp.com/import/league \
 
 ## Checklist
 
-- [ ] `platforms/{name}/knowledge/platform-guide.md` documents data format
-- [ ] `platforms/{name}/scripts/parse.py` outputs valid EasyChamp import JSON
-- [ ] `.claude/commands/import-{name}.md` skill file created
-- [ ] `core/scripts/validate_import.py import.json --strict` passes with 0 errors
+- [ ] `platforms/{name}/guide.md` documents data format and field mapping
+- [ ] `platforms/{name}/parse.py` outputs valid EasyChamp import JSON
+- [ ] SKILL.md updated with platform-specific section
+- [ ] `scripts/validate_import.py import.json --strict` passes with 0 errors
 - [ ] README.md updated with new platform in the table
