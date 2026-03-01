@@ -291,6 +291,28 @@ If team/player ExternalIds are refreshed, new duplicates are created instead of 
 
 To reimport: delete the league first (`DELETE /champ-leagues/{id}?forceDelete=true`), then import with fresh structural ExternalIds.
 
-## 22. GHA Concurrency Cancellation
+## 22. Duplicate League Creation (League.Id / ExternalId Mismatch)
+
+**CRITICAL**: The `League.Id` field in the import JSON becomes the league's `ExternalId` in MongoDB. The import service uses this to find existing leagues.
+
+For PS23 Soccer League, ALWAYS use:
+```json
+"League": {
+  "Id": "PS23 Soccer League",
+  "Name": "PS23 Soccer League"
+}
+```
+
+**NEVER** use the league's MongoDB `_id` (e.g., `8f541539-...`) as the `League.Id`. This creates a new league with `ExternalId` = that UUID, instead of matching the existing one with `ExternalId` = `"PS23 Soccer League"`.
+
+**What happened (2026-03-01)**: C108 import used a generated UUID as `League.Id`, creating a duplicate league. C108 ended up under the wrong league and 404'd on the original league's page. Fixed by manually updating `ChampLeagueRef` in MongoDB and deleting 4 duplicate league entries.
+
+**Algorithm for finding existing league**:
+1. Query `champLeagues.findOne({ExternalId: "PS23 Soccer League"})` 
+2. If found → use its `_id` and full ref object as `ChampLeagueRef`
+3. If not found → the import will create it (first time only)
+4. **NEVER pass a league _id as ExternalId** — this chains duplicates
+
+## 23. GHA Concurrency Cancellation
 
 Pushing rapidly to the same branch may cancel in-progress GHA builds. The latest push's build includes all prior commits, so only the last build's Docker image matters. But be aware that cancelled builds mean intermediate commits are never independently deployed.
