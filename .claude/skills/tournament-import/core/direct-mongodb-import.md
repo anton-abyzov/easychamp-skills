@@ -1,6 +1,37 @@
 # EasyChamp Tournament Import Guide
 
-## The Import Endpoint Works! (Validated 2026-02-22)
+## CRITICAL JSON STRUCTURE RULES (2026-03-01)
+
+⚠️ **`Champs` array MUST be INSIDE the `League` object**, not at root level:
+```json
+// ✅ CORRECT
+{"League": {"Id": "...", "Champs": [...]}}
+
+// ❌ WRONG — Champs will deserialize as empty list
+{"League": {"Id": "..."}, "Champs": [...]}
+```
+
+⚠️ **Fixtures MUST use `HomeTeam`/`AwayTeam` objects**, not string IDs:
+```json
+// ✅ CORRECT
+"HomeTeam": {"Id": "#10 FC", "Name": "#10 FC", "SportKindName": "Soccer"}
+
+// ❌ WRONG — causes NullReferenceException at ImportLeagueService.cs:286
+"HomeTeamId": "#10 FC"
+```
+
+## News Article Creation via MongoDB
+
+When creating news directly in MongoDB, these fields are REQUIRED (the API returns 500 without them):
+- `SportKindRef._id` must be a UUID string (e.g. `"05684792-9662-4e9f-a163-8545e5736c3d"` for Soccer), NOT an integer
+- `ContentType` must be `NumberInt(1)` (not 0)
+- `AddedAtUtc`, `UpdatedAtUtc`, `Date` — ISODate objects
+- `IsPublic: true`, `IsPublished: true`
+- `Categories` — array of `{EntityId: "<champ-or-league-id>", Type: <0=champ, 1=league, 2=team>}`
+
+News URL format: `https://easychamp.com/news/<news-id>` (NOT under `/observe/competition/`)
+
+## The Import Endpoint Works! (Validated 2026-02-22, re-validated 2026-03-01)
 
 The `/import/league` endpoint handles **everything** — fixtures, squads, events, standings, and player stats are all auto-calculated. The Swagger documentation is misleading because it hides the `Fixtures` property on the Group model, but the property exists (confirmed via reflection on `Sc.ApiCore.Lib` v3.0.19).
 

@@ -313,6 +313,34 @@ For PS23 Soccer League, ALWAYS use:
 3. If not found → the import will create it (first time only)
 4. **NEVER pass a league _id as ExternalId** — this chains duplicates
 
-## 23. GHA Concurrency Cancellation
+## 23. Import JSON Structure — Champs Inside League, Team Objects in Fixtures
+
+**CRITICAL**: Two JSON structure mistakes that silently fail or crash:
+
+### Champs at root level → 0 champs imported (silent failure)
+```json
+// ❌ WRONG — Champs at root, League.Champs deserializes as empty
+{"ImportSource": 99, "League": {"Id": "...", "Name": "..."}, "Champs": [...]}
+
+// ✅ CORRECT — Champs inside League
+{"ImportSource": 99, "League": {"Id": "...", "Name": "...", "Champs": [...]}}
+```
+
+### String team IDs in fixtures → NullReferenceException
+```json
+// ❌ WRONG — causes NullRef at ImportLeagueService.cs:286
+"HomeTeamId": "#10 FC"
+
+// ✅ CORRECT — HomeTeam/AwayTeam must be Team objects
+"HomeTeam": {"Id": "#10 FC", "Name": "#10 FC", "SportKindName": "Soccer"}
+```
+
+**What happened (2026-03-01)**: Import returned `champsImported: 0` because Champs array was at root level. After fixing that, NullRef crashed because fixtures used `HomeTeamId`/`AwayTeamId` strings instead of `HomeTeam`/`AwayTeam` objects. Both issues are NOT caught by validation — the API returns 200 OK with 0 champs for the first issue.
+
+### API Base URLs
+- Remote API: `https://easychamp.com/ec-standings-api/` (NOT `api.easychamp.com` which often returns 522)
+- Local API: `http://127.0.0.1:5010/ec-standings-api/` (via `ASPNETCORE_ENVIRONMENT=Development dotnet run`)
+
+## 24. GHA Concurrency Cancellation
 
 Pushing rapidly to the same branch may cancel in-progress GHA builds. The latest push's build includes all prior commits, so only the last build's Docker image matters. But be aware that cancelled builds mean intermediate commits are never independently deployed.
