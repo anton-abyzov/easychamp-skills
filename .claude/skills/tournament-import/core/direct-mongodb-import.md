@@ -27,7 +27,9 @@ When creating news directly in MongoDB, these fields are REQUIRED (the API retur
 - `ContentType` must be `NumberInt(1)` (not 0)
 - `AddedAtUtc`, `UpdatedAtUtc`, `Date` — ISODate objects
 - `IsPublic: true`, `IsPublished: true`
-- `Categories` — array of `{EntityId: "<champ-or-league-id>", Type: <0=champ, 1=league, 2=team>}`
+- `Categories` — array of `{EntityId: "<id>", Type: <0=champ, 2=league>}`
+  - ⚠️ League category uses `Type: 2` (NOT `Type: 1`). Type 1 does NOT show on subdomain.
+  - Example: `[{EntityId: "<champ-id>", Type: 0}, {EntityId: "<league-id>", Type: 2}]`
 
 News URL format: `https://easychamp.com/news/<news-id>` (NOT under `/observe/competition/`)
 
