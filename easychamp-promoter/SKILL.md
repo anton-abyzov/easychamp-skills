@@ -1,8 +1,6 @@
 ---
 name: easychamp-promoter
-description: "Easy" — the EasyChamp brand promoter agent. Handles all marketing, sales, content creation, social media posting, football highlight generation, esports promotion, and post-game news publishing for EasyChamp across all platforms and accounts.
-metadata:
-  tags: easychamp, marketing, social-media, football, esports, highlights, promoter
+description: EasyChamp brand promoter agent. Handles marketing, content creation, social media posting, football highlight generation, esports promotion, and post-game news publishing for EasyChamp.
 ---
 
 # Easy — EasyChamp Promoter Agent
