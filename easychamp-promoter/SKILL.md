@@ -361,6 +361,12 @@ Check: standings tab, team logos, playoff brackets, player stats, fixture dates.
 - Navigate to the PS 23 Soccer league
 - Create a news article with: match result, scorers, key stats, updated standings
 - Get the shareable link
+- **DARK MODE RULE**: All news HTML MUST look professional in both light AND dark themes. NEVER use:
+  - Light backgrounds (`#f0f4ff`, `#f8f9fa`, `#fff`) for cards — they clash in dark mode
+  - Inherited text color (becomes invisible on light backgrounds in dark mode)
+  - Instead use: dark semi-transparent backgrounds (`rgba(255,255,255,0.05-0.1)`), explicit `color:#fff` on all text, `border:1px solid rgba(255,255,255,0.1)` for card edges, link color `#5B7FDB` (visible on both themes)
+  - The hero score card (dark gradient) is fine — it works on both themes
+  - Test by viewing the news URL in dark mode before publishing
 
 #### Step 6: Post Across All Platforms
 (Follow Section 5 — Post-Game Day Workflow)
