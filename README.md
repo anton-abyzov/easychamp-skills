@@ -1,28 +1,35 @@
-# EasyChamp Tournament Import Skill
+# EasyChamp Skills
 
-A [Claude Code skill](https://docs.anthropic.com/en/docs/claude-code/skills) for importing tournament data into EasyChamp from external sports platforms.
+Claude Code skills for EasyChamp tournament management.
+
+## Skills
+
+| Skill | Description |
+|-------|-------------|
+| [tournament-import](tournament-import/) | Import tournament data from external sports platforms |
+| [easychamp-promoter](easychamp-promoter/) | Promote EasyChamp tournaments |
 
 ## Installation
 
 ### Personal skill (all your projects)
 ```bash
 git clone https://github.com/anton-abyzov/easychamp-skills.git
-cp -r easychamp-skills/.claude/skills/tournament-import ~/.claude/skills/
+cp -r easychamp-skills/tournament-import ~/.claude/skills/
 ```
 
 ### Project skill (single project)
 ```bash
 git clone https://github.com/anton-abyzov/easychamp-skills.git
-cp -r easychamp-skills/.claude/skills/tournament-import /path/to/project/.claude/skills/
+cp -r easychamp-skills/tournament-import /path/to/project/.claude/skills/
 ```
 
 ### Or symlink for easy updates
 ```bash
 git clone https://github.com/anton-abyzov/easychamp-skills.git
-ln -s $(pwd)/easychamp-skills/.claude/skills/tournament-import ~/.claude/skills/tournament-import
+ln -s $(pwd)/easychamp-skills/tournament-import ~/.claude/skills/tournament-import
 ```
 
-## Usage
+## Tournament Import
 
 Invoke the skill in Claude Code:
 ```
@@ -31,17 +38,17 @@ Invoke the skill in Claude Code:
 /tournament-import fix-brackets {champId}
 ```
 
-## Supported Platforms
+### Supported Platforms
 
 | Platform | Status | Guide |
 |----------|--------|-------|
-| PS23 Soccer | Available | [guide.md](.claude/skills/tournament-import/platforms/ps23/guide.md) |
+| PS23 Soccer | Available | [guide.md](tournament-import/platforms/ps23/guide.md) |
 | FlashScore | Planned | - |
 
-## Structure
+### Structure
 
 ```
-.claude/skills/tournament-import/
+tournament-import/
 ├── SKILL.md                       # Main skill (entry point)
 ├── core/                          # EasyChamp import knowledge (platform-agnostic)
 │   ├── api-reference.md           # API endpoints and payloads
@@ -66,7 +73,7 @@ Invoke the skill in Claude Code:
 
 **Platforms** handle parsing FROM a specific source website. Each platform has its own parser and knowledge doc.
 
-## Workflow
+### Workflow
 
 ```
 Source website → Platform parser → import.json → validate → API import → verify & fix
@@ -75,11 +82,11 @@ Source website → Platform parser → import.json → validate → API import �
                                                                league)
 ```
 
-## Adding a New Platform
+### Adding a New Platform
 
-See [ADDING-PLATFORM.md](.claude/skills/tournament-import/platforms/ADDING-PLATFORM.md).
+See [ADDING-PLATFORM.md](tournament-import/platforms/ADDING-PLATFORM.md).
 
-## Key Rules
+### Key Rules
 
 - **Scores**: Always strings (`"5"` not `5`)
 - **Event types**: `"scorer"` not `"goal"`
