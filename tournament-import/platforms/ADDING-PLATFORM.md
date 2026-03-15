@@ -2,6 +2,24 @@
 
 Guide for adding support for a new sports website to the tournament-import skill.
 
+## Choose Your Approach
+
+Before building a custom parser, consider whether the **Cloudflare /crawl** approach would be faster:
+
+| Scenario | Recommended Approach |
+|----------|---------------------|
+| Platform has admin JSON export | Custom parser (this guide) |
+| No API, scraping a website | [Cloudflare /crawl](cloudflare-crawl/guide.md) — no parser code needed |
+| JavaScript-heavy SPA (e.g., FlashScore) | [Cloudflare /crawl](cloudflare-crawl/guide.md) with `render: true` |
+| One-off import from an unfamiliar site | [Cloudflare /crawl](cloudflare-crawl/guide.md) — zero maintenance |
+| Ongoing imports, need full control | Custom parser (this guide) |
+
+The Cloudflare approach uses AI extraction to map any site's data to EasyChamp format with a single API call — no custom code required. See [cloudflare-crawl/guide.md](cloudflare-crawl/guide.md) for the full workflow.
+
+---
+
+## Custom Parser Approach
+
 ## Step 1: Create the directory structure
 
 ```bash

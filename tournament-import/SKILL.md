@@ -256,9 +256,66 @@ Fixture: "ps23:fixture:{home_slug}-vs-{away_slug}-{week}"
 - [Import Templates](templates/) - JSON templates for fixture, league, and playoff imports
 - [Adding a New Platform](platforms/ADDING-PLATFORM.md) - Step-by-step guide for new sites
 
+## PLATFORM: Cloudflare /crawl (Universal Scraper)
+
+For any tournament website where you don't have admin JSON exports, use Cloudflare's Browser Rendering
+`/crawl` endpoint to scrape and extract structured data with zero custom parser code.
+
+### When to Use
+
+- New platform with no API access — point at the URL, get structured data back
+- JavaScript-heavy sites (FlashScore, etc.) — `render: true` runs headless Chrome
+- One-off imports from unfamiliar sites — no parser to maintain
+- As a fallback for PS23 public pages when admin exports aren't available
+
+### Quick Start
+
+```bash
+# 1. Start crawl job
+python platforms/cloudflare-crawl/crawl.py start \
+  --url "https://league-site.com/season-2025" \
+  --account-id "$CF_ACCOUNT_ID" --api-token "$CF_API_TOKEN" \
+  --limit 50 --depth 3 --render
+
+# 2. Poll until complete
+python platforms/cloudflare-crawl/crawl.py poll \
+  --job-id "JOB_ID" --output raw_crawl.json
+
+# 3. Transform to EasyChamp format
+python platforms/cloudflare-crawl/crawl.py transform \
+  --input raw_crawl.json --output import.json \
+  --league-name "My League" --country "USA"
+
+# 4. Standard pipeline
+python scripts/validate_import.py import.json --strict
+```
+
+### Two-Pass Strategy (Recommended for Complex Sites)
+
+For best results, crawl with `markdown` format first, then let Claude parse the pages
+using full EasyChamp schema context. This gives better accuracy than single-pass AI extraction
+because Claude can cross-reference across pages and apply all import rules.
+
+### Full Reference
+
+See [Cloudflare /crawl Guide](platforms/cloudflare-crawl/guide.md) for:
+- API reference and parameters
+- AI extraction prompt tuning
+- Pricing and limits
+- Two-pass strategy details
+- Environment variables setup
+
+---
+
 ## Extending to Other Platforms
 
 To add support for a new sports website (e.g., FlashScore):
+
+**Option A: Cloudflare /crawl (recommended for scraping)**
+1. Use the universal scraper — see [Cloudflare /crawl Guide](platforms/cloudflare-crawl/guide.md)
+2. No custom parser needed. Tune the AI extraction prompt if needed.
+
+**Option B: Custom parser (recommended for structured APIs/exports)**
 1. Create `platforms/{name}/guide.md` documenting the data format
 2. Create `platforms/{name}/parse.py` to transform data into EasyChamp format
 3. Update this SKILL.md with platform-specific workflow and gotchas
