@@ -1,0 +1,61 @@
+{
+  "skill_name": "tournament-import",
+  "evals": [
+    {
+      "id": 1,
+      "name": "ps23-parse-with-penalties",
+      "prompt": "I have PS23 Soccer JSON data for a 4-team mini-league called 'Copa Verano 2026' in Mexico. The data includes 6 group stage matches and playoffs (2 semifinals + a final that went to penalties 4-3). Parse this data and generate a valid EasyChamp import JSON file ready for POST /import/league. The PS23 data file is at evals/files/ps23-copa-verano.json. Use the existing PS23 parser if available, or generate the import JSON manually following EasyChamp's import format.",
+      "expected_output": "A valid EasyChamp import JSON with correct field types, proper event types, penalty handling with PeriodScores, and all players included in squads",
+      "files": ["evals/files/ps23-copa-verano.json"],
+      "expectations": [
+        "All HomeTeamScore and AwayTeamScore values are strings (e.g., '3' not 3)",
+        "HomePenaltyScore and AwayPenaltyScore are strings (e.g., '4' not 4)",
+        "PeriodScores uses Home_score and Away_score (snake_case), not HomeScore/AwayScore",
+        "PeriodScores Type is lowercase 'penalties', not 'Penalties'",
+        "EventType is 'scorer' for goals, not 'goal'",
+        "Every Player object has an OtherFullName field (even if empty string)",
+        "Champs array is nested inside League object, not at root level",
+        "The 'R. Gutierrez x2' scorer creates exactly 2 separate goal events",
+        "Output contains both a Group Stage (Type: League) and Playoffs (Type: Playoff) stage",
+        "All scorers appear in their team's squad for that fixture"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "knockout-bracket-8-teams",
+      "prompt": "Create an EasyChamp import JSON for an 8-team knockout tournament called 'Copa Primavera 2026' under 'Liga Juvenil AR' league (Argentina, Soccer). The 8 teams are: Pumas FC, Rayos del Norte, Condores SC, Toros United, Panteras CF, Vikingos FC, Delfines SC, and Leones Azules. Generate the full bracket structure with quarterfinals, semifinals, final, and 3rd place playoff. All matches should have Status 0 (not yet played) with scores '0'-'0'. Use proper binary tree node ordering for the bracket. The import should be ready for POST /import/league.",
+      "expected_output": "A valid EasyChamp import JSON with 8-team knockout bracket using proper binary tree ordering and valid matchDayName values",
+      "files": [],
+      "expectations": [
+        "Quarterfinal fixtures have Order values from 4-7 (binary tree node IDs for depth 2)",
+        "Semifinal fixtures have Order values 2 and 3 (binary tree node IDs for depth 1)",
+        "Final fixture has Order value 1 (binary tree root node)",
+        "All matchDayName values are lowercase without hyphens: 'quarterfinal', 'semifinal', 'final', '3rd_place_playoff'",
+        "A 3rd place playoff fixture exists with matchDayName '3rd_place_playoff'",
+        "Champs array is nested inside League object, not at root level",
+        "All scores are strings ('0' not 0)",
+        "There are exactly 4 quarterfinal + 2 semifinal + 1 final + 1 third place = 8 total playoff fixtures",
+        "HomeTeam and AwayTeam are objects with at least Id and Name fields, not string IDs"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "diagnose-fix-broken-import",
+      "prompt": "I have an import JSON file at evals/files/broken-import.json that I tried to use with EasyChamp's POST /import/league API, but things went wrong: scores aren't displaying properly, the bracket visualization is broken, and goal events aren't showing up. Please diagnose all the issues in this file and produce a corrected version. Save the fixed file as fixed-import.json.",
+      "expected_output": "A diagnosis listing all 6+ issues and a corrected import JSON with all pitfalls fixed",
+      "files": ["evals/files/broken-import.json"],
+      "expectations": [
+        "Identifies that HomeTeamScore/AwayTeamScore are numbers and must be strings",
+        "Identifies that 'Quarter-Final' must be 'quarterfinal' (lowercase, no hyphen)",
+        "Identifies that 'Semi-Final' must be 'semifinal' (lowercase, no hyphen)",
+        "Identifies that PeriodScores uses HomeScore/AwayScore but must use Home_score/Away_score",
+        "Identifies that PeriodScores Type is 'Penalties' but must be lowercase 'penalties'",
+        "Identifies that EventType 'goal' must be 'scorer'",
+        "Identifies that Champs is at root level but must be inside League object",
+        "Identifies that Player objects are missing OtherFullName field",
+        "Identifies that HomePenaltyScore/AwayPenaltyScore are numbers but must be strings",
+        "The fixed output file has all issues corrected"
+      ]
+    }
+  ]
+}

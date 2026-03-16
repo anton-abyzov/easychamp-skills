@@ -1,0 +1,121 @@
+{
+  "competition": {
+    "name": "Copa Verano 2026",
+    "league_name": "Liga Recreativa MX",
+    "country": "Mexico",
+    "start_date": "2026-01-10",
+    "end_date": "2026-02-28"
+  },
+  "all_games": [
+    {
+      "home": "Tigres FC",
+      "away": "Lobos Rojos",
+      "score": "3-1",
+      "week": 1,
+      "date": "2026-01-10",
+      "home_id": "142",
+      "away_id": "187",
+      "home_scorers": "R. Gutierrez x2; M. Salazar",
+      "away_scorers": "J. Mendez"
+    },
+    {
+      "home": "Aguilas Doradas",
+      "away": "Halcones CF",
+      "score": "0-2",
+      "week": 1,
+      "date": "2026-01-10",
+      "home_id": "203",
+      "away_id": "156",
+      "home_scorers": "",
+      "away_scorers": "P. Romero; D. Castillo"
+    },
+    {
+      "home": "Lobos Rojos",
+      "away": "Aguilas Doradas",
+      "score": "1-1",
+      "week": 2,
+      "date": "2026-01-17",
+      "home_id": "187",
+      "away_id": "203",
+      "home_scorers": "J. Mendez",
+      "away_scorers": "C. Vargas"
+    },
+    {
+      "home": "Halcones CF",
+      "away": "Tigres FC",
+      "score": "2-2",
+      "week": 2,
+      "date": "2026-01-17",
+      "home_id": "156",
+      "away_id": "142",
+      "home_scorers": "P. Romero; D. Castillo",
+      "away_scorers": "R. Gutierrez; M. Salazar"
+    },
+    {
+      "home": "Tigres FC",
+      "away": "Aguilas Doradas",
+      "score": "4-0",
+      "week": 3,
+      "date": "2026-01-24",
+      "home_id": "142",
+      "away_id": "203",
+      "home_scorers": "R. Gutierrez x2; M. Salazar; A. Torres",
+      "away_scorers": ""
+    },
+    {
+      "home": "Lobos Rojos",
+      "away": "Halcones CF",
+      "score": "0-1",
+      "week": 3,
+      "date": "2026-01-24",
+      "home_id": "187",
+      "away_id": "156",
+      "home_scorers": "",
+      "away_scorers": "P. Romero"
+    }
+  ],
+  "all_player_stats": [
+    {"team": "Tigres FC", "player": "R. Gutierrez"},
+    {"team": "Tigres FC", "player": "M. Salazar"},
+    {"team": "Tigres FC", "player": "A. Torres"},
+    {"team": "Tigres FC", "player": "L. Navarro"},
+    {"team": "Lobos Rojos", "player": "J. Mendez"},
+    {"team": "Lobos Rojos", "player": "F. Reyes"},
+    {"team": "Aguilas Doradas", "player": "C. Vargas"},
+    {"team": "Aguilas Doradas", "player": "E. Luna"},
+    {"team": "Halcones CF", "player": "P. Romero"},
+    {"team": "Halcones CF", "player": "D. Castillo"},
+    {"team": "Halcones CF", "player": "S. Herrera"}
+  ],
+  "playoffs": {
+    "semifinals": [
+      {
+        "home": "Tigres FC",
+        "away": "Halcones CF",
+        "score": "2-0",
+        "date": "2026-02-07",
+        "home_scorers": "R. Gutierrez; M. Salazar",
+        "away_scorers": ""
+      },
+      {
+        "home": "Lobos Rojos",
+        "away": "Aguilas Doradas",
+        "score": "1-0",
+        "date": "2026-02-07",
+        "home_scorers": "J. Mendez",
+        "away_scorers": ""
+      }
+    ],
+    "final": [
+      {
+        "home": "Tigres FC",
+        "away": "Lobos Rojos",
+        "score": "1-1",
+        "date": "2026-02-28",
+        "home_scorers": "R. Gutierrez",
+        "away_scorers": "J. Mendez",
+        "penalty_score": "pen 4-3"
+      }
+    ]
+  }
+}

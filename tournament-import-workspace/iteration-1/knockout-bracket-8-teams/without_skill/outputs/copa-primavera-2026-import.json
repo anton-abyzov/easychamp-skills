@@ -1,0 +1,111 @@
+{
+  "League": {
+    "Name": "Liga Juvenil AR",
+    "Country": "Argentina",
+    "Sport": "Soccer"
+  },
+  "Season": {
+    "Name": "Copa Primavera 2026",
+    "Type": 2
+  },
+  "Teams": [
+    { "Name": "Pumas FC" },
+    { "Name": "Rayos del Norte" },
+    { "Name": "Condores SC" },
+    { "Name": "Toros United" },
+    { "Name": "Panteras CF" },
+    { "Name": "Vikingos FC" },
+    { "Name": "Delfines SC" },
+    { "Name": "Leones Azules" }
+  ],
+  "Rounds": [
+    {
+      "Name": "Quarter-finals",
+      "Order": 1,
+      "Matches": [
+        {
+          "Node": 1,
+          "HomeTeam": "Pumas FC",
+          "AwayTeam": "Rayos del Norte",
+          "HomeScore": "0",
+          "AwayScore": "0",
+          "Status": 0
+        },
+        {
+          "Node": 2,
+          "HomeTeam": "Condores SC",
+          "AwayTeam": "Toros United",
+          "HomeScore": "0",
+          "AwayScore": "0",
+          "Status": 0
+        },
+        {
+          "Node": 3,
+          "HomeTeam": "Panteras CF",
+          "AwayTeam": "Vikingos FC",
+          "HomeScore": "0",
+          "AwayScore": "0",
+          "Status": 0
+        },
+        {
+          "Node": 4,
+          "HomeTeam": "Delfines SC",
+          "AwayTeam": "Leones Azules",
+          "HomeScore": "0",
+          "AwayScore": "0",
+          "Status": 0
+        }
+      ]
+    },
+    {
+      "Name": "Semi-finals",
+      "Order": 2,
+      "Matches": [
+        {
+          "Node": 5,
+          "HomeTeam": null,
+          "AwayTeam": null,
+          "HomeScore": "0",
+          "AwayScore": "0",
+          "Status": 0
+        },
+        {
+          "Node": 6,
+          "HomeTeam": null,
+          "AwayTeam": null,
+          "HomeScore": "0",
+          "AwayScore": "0",
+          "Status": 0
+        }
+      ]
+    },
+    {
+      "Name": "3rd Place",
+      "Order": 3,
+      "Matches": [
+        {
+          "Node": 7,
+          "HomeTeam": null,
+          "AwayTeam": null,
+          "HomeScore": "0",
+          "AwayScore": "0",
+          "Status": 0
+        }
+      ]
+    },
+    {
+      "Name": "Final",
+      "Order": 4,
+      "Matches": [
+        {
+          "Node": 8,
+          "HomeTeam": null,
+          "AwayTeam": null,
+          "HomeScore": "0",
+          "AwayScore": "0",
+          "Status": 0
+        }
+      ]
+    }
+  ]
+}

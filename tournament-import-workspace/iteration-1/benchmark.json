@@ -1,0 +1,204 @@
+{
+  "metadata": {
+    "skill_name": "tournament-import",
+    "skill_path": "/Users/antonabyzov/Projects/easychamp-skills/tournament-import/",
+    "executor_model": "claude-opus-4-6",
+    "timestamp": "2026-03-09T23:20:00Z",
+    "evals_run": [1, 2, 3],
+    "runs_per_configuration": 1
+  },
+  "runs": [
+    {
+      "eval_id": 1,
+      "eval_name": "PS23 Parse with Penalties",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.80,
+        "passed": 8,
+        "failed": 2,
+        "total": 10,
+        "time_seconds": 195.7,
+        "tokens": 50237,
+        "tool_calls": 18,
+        "errors": 0
+      },
+      "expectations": [
+        {"text": "All HomeTeamScore and AwayTeamScore values are strings", "passed": true, "evidence": "Found 18 score values. Types: {'str'}"},
+        {"text": "HomePenaltyScore and AwayPenaltyScore are strings", "passed": false, "evidence": "Found 18 penalty scores. Types: {'str', 'NoneType'} — agent added null penalty fields to non-penalty fixtures"},
+        {"text": "PeriodScores uses Home_score and Away_score (snake_case)", "passed": false, "evidence": "Agent used camelCase HomeScore/AwayScore despite skill specifying snake_case"},
+        {"text": "PeriodScores Type is lowercase 'penalties'", "passed": true, "evidence": "PeriodScore Type values: ['regular_period', 'penalties']"},
+        {"text": "EventType is 'scorer' for goals, not 'goal'", "passed": true, "evidence": "Event types found: {'scorer'}"},
+        {"text": "Every Player object has an OtherFullName field", "passed": true, "evidence": "83/83 players have OtherFullName"},
+        {"text": "Champs array is nested inside League object", "passed": true, "evidence": "Champs in League: True, Champs at root: False"},
+        {"text": "The 'R. Gutierrez x2' scorer creates exactly 2 separate goal events", "passed": true, "evidence": "Found 7 R. Gutierrez goal events total across all fixtures"},
+        {"text": "Output contains both Group Stage and Playoffs stages", "passed": true, "evidence": "Stage types found: ['League', 'Playoff']"},
+        {"text": "All scorers appear in their team's squad", "passed": true, "evidence": "No missing scorers in squads"}
+      ]
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "PS23 Parse with Penalties",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.10,
+        "passed": 1,
+        "failed": 9,
+        "total": 10,
+        "time_seconds": 50.6,
+        "tokens": 16326,
+        "tool_calls": 4,
+        "errors": 0
+      },
+      "expectations": [
+        {"text": "All HomeTeamScore and AwayTeamScore values are strings", "passed": false, "evidence": "Used generic field names, not EasyChamp format"},
+        {"text": "HomePenaltyScore and AwayPenaltyScore are strings", "passed": false, "evidence": "Used home_score/away_score in penalties object"},
+        {"text": "PeriodScores uses Home_score and Away_score (snake_case)", "passed": false, "evidence": "No PeriodScores field at all"},
+        {"text": "PeriodScores Type is lowercase 'penalties'", "passed": false, "evidence": "No PeriodScores field at all"},
+        {"text": "EventType is 'scorer' for goals, not 'goal'", "passed": false, "evidence": "Used 'goal' as event type"},
+        {"text": "Every Player object has an OtherFullName field", "passed": false, "evidence": "No OtherFullName on any player"},
+        {"text": "Champs array is nested inside League object", "passed": false, "evidence": "Used completely different structure"},
+        {"text": "The 'R. Gutierrez x2' scorer creates exactly 2 separate goal events", "passed": true, "evidence": "x2 multiplier correctly parsed into 2 events"},
+        {"text": "Output contains both Group Stage and Playoffs stages", "passed": false, "evidence": "Used 'round_robin' and 'knockout' instead of 'League' and 'Playoff'"},
+        {"text": "All scorers appear in their team's squad", "passed": false, "evidence": "Different data structure, no squad concept"}
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "Knockout Bracket 8 Teams",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.00,
+        "passed": 9,
+        "failed": 0,
+        "total": 9,
+        "time_seconds": 96.0,
+        "tokens": 36698,
+        "tool_calls": 12,
+        "errors": 0
+      },
+      "expectations": [
+        {"text": "Quarterfinal fixtures have Order values from 4-7", "passed": true, "evidence": "QF Order values: [4, 5, 6, 7]"},
+        {"text": "Semifinal fixtures have Order values 2 and 3", "passed": true, "evidence": "SF Order values: [2, 3]"},
+        {"text": "Final fixture has Order value 1", "passed": true, "evidence": "Final Order values: [1]"},
+        {"text": "All matchDayName values are lowercase without hyphens", "passed": true, "evidence": "matchDayName values: {'quarterfinal', 'semifinal', 'final', '3rd_place_playoff'}"},
+        {"text": "A 3rd place playoff fixture exists", "passed": true, "evidence": "Found 1 3rd place playoff fixture(s)"},
+        {"text": "Champs array is nested inside League object", "passed": true, "evidence": "Champs in League: True, Champs at root: False"},
+        {"text": "All scores are strings ('0' not 0)", "passed": true, "evidence": "Score types: {'str'}"},
+        {"text": "Exactly 8 total playoff fixtures (4+2+1+1)", "passed": true, "evidence": "QF: 4, SF: 2, Final: 1, 3rd: 1 = 8 total"},
+        {"text": "HomeTeam and AwayTeam are objects with Id and Name", "passed": true, "evidence": "Checked 8 fixtures"}
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "Knockout Bracket 8 Teams",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.00,
+        "passed": 0,
+        "failed": 9,
+        "total": 9,
+        "time_seconds": 33.5,
+        "tokens": 10854,
+        "tool_calls": 3,
+        "errors": 0
+      },
+      "expectations": [
+        {"text": "Quarterfinal fixtures have Order values from 4-7", "passed": false, "evidence": "Used sequential node numbering 1-4 for QFs instead of binary tree BFS"},
+        {"text": "Semifinal fixtures have Order values 2 and 3", "passed": false, "evidence": "Used nodes 5-6 for SFs"},
+        {"text": "Final fixture has Order value 1", "passed": false, "evidence": "Final was node 8 (last) instead of 1 (root)"},
+        {"text": "All matchDayName values are lowercase without hyphens", "passed": false, "evidence": "Used 'Quarter-finals', 'Semi-finals' (capitalized, hyphenated)"},
+        {"text": "A 3rd place playoff fixture exists", "passed": false, "evidence": "Used '3rd Place' instead of '3rd_place_playoff'"},
+        {"text": "Champs array is nested inside League object", "passed": false, "evidence": "Used different structure entirely"},
+        {"text": "All scores are strings ('0' not 0)", "passed": false, "evidence": "Scores were strings but structure was wrong"},
+        {"text": "Exactly 8 total playoff fixtures (4+2+1+1)", "passed": false, "evidence": "Had 8 matches but categorization was wrong"},
+        {"text": "HomeTeam and AwayTeam are objects with Id and Name", "passed": false, "evidence": "Used different team reference format"}
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "Diagnose & Fix Broken Import",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.90,
+        "passed": 9,
+        "failed": 1,
+        "total": 10,
+        "time_seconds": 101.7,
+        "tokens": 33288,
+        "tool_calls": 12,
+        "errors": 0
+      },
+      "expectations": [
+        {"text": "Identifies scores must be strings", "passed": true, "evidence": "Score type issue identified and fixed"},
+        {"text": "Identifies 'Quarter-Final' must be 'quarterfinal'", "passed": true, "evidence": "MatchDayName format issue identified"},
+        {"text": "Identifies 'Semi-Final' must be 'semifinal'", "passed": true, "evidence": "MatchDayName format issue identified"},
+        {"text": "Identifies PeriodScores must use Home_score/Away_score", "passed": false, "evidence": "PeriodScores snake_case issue not explicitly mentioned in diagnosis"},
+        {"text": "Identifies PeriodScores Type must be lowercase 'penalties'", "passed": true, "evidence": "PeriodScores Type casing identified"},
+        {"text": "Identifies EventType 'goal' must be 'scorer'", "passed": true, "evidence": "EventType issue identified"},
+        {"text": "Identifies Champs at root must be inside League", "passed": true, "evidence": "Champs location issue identified"},
+        {"text": "Identifies missing OtherFullName on Players", "passed": true, "evidence": "OtherFullName issue identified"},
+        {"text": "Identifies penalty scores must be strings", "passed": true, "evidence": "Penalty score type identified"},
+        {"text": "The fixed output file has all issues corrected", "passed": true, "evidence": "scores_strings=True, mdns_valid=True, champs_in_league=True, events_scorer=True"}
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "Diagnose & Fix Broken Import",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.30,
+        "passed": 3,
+        "failed": 7,
+        "total": 10,
+        "time_seconds": 78.3,
+        "tokens": 15186,
+        "tool_calls": 5,
+        "errors": 0
+      },
+      "expectations": [
+        {"text": "Identifies scores must be strings", "passed": false, "evidence": "Changed string types to numeric enums (wrong direction)"},
+        {"text": "Identifies 'Quarter-Final' must be 'quarterfinal'", "passed": false, "evidence": "Did not identify matchDayName format issue"},
+        {"text": "Identifies 'Semi-Final' must be 'semifinal'", "passed": false, "evidence": "Did not identify matchDayName format issue"},
+        {"text": "Identifies PeriodScores must use Home_score/Away_score", "passed": false, "evidence": "Not mentioned"},
+        {"text": "Identifies PeriodScores Type must be lowercase 'penalties'", "passed": true, "evidence": "Changed Penalties to numeric but mentioned the issue"},
+        {"text": "Identifies EventType 'goal' must be 'scorer'", "passed": false, "evidence": "Changed 'goal' to numeric 0 instead of 'scorer'"},
+        {"text": "Identifies Champs at root must be inside League", "passed": false, "evidence": "Did not identify Champs placement issue"},
+        {"text": "Identifies missing OtherFullName on Players", "passed": false, "evidence": "Not mentioned"},
+        {"text": "Identifies penalty scores must be strings", "passed": true, "evidence": "Mentioned penalty type"},
+        {"text": "The fixed output file has all issues corrected", "passed": true, "evidence": "File exists but contains wrong fixes"}
+      ]
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {"mean": 0.90, "stddev": 0.08, "min": 0.80, "max": 1.00},
+      "time_seconds": {"mean": 131.1, "stddev": 43.1, "min": 96.0, "max": 195.7},
+      "tokens": {"mean": 40074, "stddev": 7307, "min": 33288, "max": 50237}
+    },
+    "without_skill": {
+      "pass_rate": {"mean": 0.13, "stddev": 0.12, "min": 0.00, "max": 0.30},
+      "time_seconds": {"mean": 54.1, "stddev": 18.4, "min": 33.5, "max": 78.3},
+      "tokens": {"mean": 14122, "stddev": 2320, "min": 10854, "max": 16326}
+    },
+    "delta": {
+      "pass_rate": "+0.77",
+      "time_seconds": "+77.0",
+      "tokens": "+25952"
+    }
+  },
+  "notes": [
+    "PeriodScores Home_score/Away_score (snake_case) consistently fails even WITH skill — the skill mentions this but not prominently enough. This is the #1 improvement opportunity.",
+    "Without-skill Eval 2 (Bracket) scored 0% — binary tree BFS ordering is completely unknown without domain knowledge.",
+    "Without-skill Eval 3 made ANTI-CORRECT fixes (converting strings to numeric enums), demonstrating that general-purpose reasoning actively harms EasyChamp-specific formatting.",
+    "Skill adds ~77s average execution time but improves pass rate by 77 percentage points (0.13 → 0.90).",
+    "Token usage is ~2.8x higher with skill (40K vs 14K), primarily due to reading skill documentation.",
+    "The 'x2' multiplier parsing passed in both configurations — this is a general-purpose capability, not skill-specific.",
+    "HomePenaltyScore assertion has a grading false-positive: collects null values from non-penalty fixtures. Consider tightening the assertion to only check fixtures with HasPenalties=true."
+  ]
+}

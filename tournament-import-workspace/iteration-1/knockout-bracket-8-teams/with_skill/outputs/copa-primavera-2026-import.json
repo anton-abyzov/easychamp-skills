@@ -1,0 +1,280 @@
+{
+  "ImportSource": 99,
+  "ImportMode": 0,
+  "League": {
+    "Name": "Liga Juvenil AR",
+    "Country": "Argentina",
+    "SportKindName": "Soccer",
+    "Id": "Liga Juvenil AR",
+    "Champs": [
+      {
+        "Name": "Copa Primavera 2026",
+        "Id": "copa-primavera-2026",
+        "ExternalId": "copa-primavera-2026",
+        "LeagueName": "Liga Juvenil AR",
+        "StartDate": "2026-03-09",
+        "EndDate": "2026-06-30",
+        "IsComplete": false,
+        "SportKindName": "Soccer",
+        "Teams": [
+          {
+            "Name": "Pumas FC",
+            "Id": "Pumas FC",
+            "SportKindName": "Soccer",
+            "TeamMembers": []
+          },
+          {
+            "Name": "Rayos del Norte",
+            "Id": "Rayos del Norte",
+            "SportKindName": "Soccer",
+            "TeamMembers": []
+          },
+          {
+            "Name": "Condores SC",
+            "Id": "Condores SC",
+            "SportKindName": "Soccer",
+            "TeamMembers": []
+          },
+          {
+            "Name": "Toros United",
+            "Id": "Toros United",
+            "SportKindName": "Soccer",
+            "TeamMembers": []
+          },
+          {
+            "Name": "Panteras CF",
+            "Id": "Panteras CF",
+            "SportKindName": "Soccer",
+            "TeamMembers": []
+          },
+          {
+            "Name": "Vikingos FC",
+            "Id": "Vikingos FC",
+            "SportKindName": "Soccer",
+            "TeamMembers": []
+          },
+          {
+            "Name": "Delfines SC",
+            "Id": "Delfines SC",
+            "SportKindName": "Soccer",
+            "TeamMembers": []
+          },
+          {
+            "Name": "Leones Azules",
+            "Id": "Leones Azules",
+            "SportKindName": "Soccer",
+            "TeamMembers": []
+          }
+        ],
+        "Stages": [
+          {
+            "Name": "Playoffs",
+            "Type": "Playoff",
+            "Order": 1,
+            "Groups": [
+              {
+                "Name": "Playoffs",
+                "TeamIds": [
+                  "Pumas FC",
+                  "Rayos del Norte",
+                  "Condores SC",
+                  "Toros United",
+                  "Panteras CF",
+                  "Vikingos FC",
+                  "Delfines SC",
+                  "Leones Azules"
+                ],
+                "Fixtures": [
+                  {
+                    "Id": "copa-primavera-2026:qf1",
+                    "Date": "2026-03-09",
+                    "HomeTeamScore": "0",
+                    "AwayTeamScore": "0",
+                    "MatchDay": 1,
+                    "MatchDayName": "quarterfinal",
+                    "Status": 0,
+                    "Order": 4,
+                    "HomeTeam": {
+                      "Id": "Pumas FC",
+                      "Name": "Pumas FC",
+                      "SportKindName": "Soccer"
+                    },
+                    "AwayTeam": {
+                      "Id": "Rayos del Norte",
+                      "Name": "Rayos del Norte",
+                      "SportKindName": "Soccer"
+                    },
+                    "HomeSquad": [],
+                    "AwaySquad": [],
+                    "Events": []
+                  },
+                  {
+                    "Id": "copa-primavera-2026:qf2",
+                    "Date": "2026-03-09",
+                    "HomeTeamScore": "0",
+                    "AwayTeamScore": "0",
+                    "MatchDay": 1,
+                    "MatchDayName": "quarterfinal",
+                    "Status": 0,
+                    "Order": 5,
+                    "HomeTeam": {
+                      "Id": "Condores SC",
+                      "Name": "Condores SC",
+                      "SportKindName": "Soccer"
+                    },
+                    "AwayTeam": {
+                      "Id": "Toros United",
+                      "Name": "Toros United",
+                      "SportKindName": "Soccer"
+                    },
+                    "HomeSquad": [],
+                    "AwaySquad": [],
+                    "Events": []
+                  },
+                  {
+                    "Id": "copa-primavera-2026:qf3",
+                    "Date": "2026-03-09",
+                    "HomeTeamScore": "0",
+                    "AwayTeamScore": "0",
+                    "MatchDay": 1,
+                    "MatchDayName": "quarterfinal",
+                    "Status": 0,
+                    "Order": 6,
+                    "HomeTeam": {
+                      "Id": "Panteras CF",
+                      "Name": "Panteras CF",
+                      "SportKindName": "Soccer"
+                    },
+                    "AwayTeam": {
+                      "Id": "Vikingos FC",
+                      "Name": "Vikingos FC",
+                      "SportKindName": "Soccer"
+                    },
+                    "HomeSquad": [],
+                    "AwaySquad": [],
+                    "Events": []
+                  },
+                  {
+                    "Id": "copa-primavera-2026:qf4",
+                    "Date": "2026-03-09",
+                    "HomeTeamScore": "0",
+                    "AwayTeamScore": "0",
+                    "MatchDay": 1,
+                    "MatchDayName": "quarterfinal",
+                    "Status": 0,
+                    "Order": 7,
+                    "HomeTeam": {
+                      "Id": "Delfines SC",
+                      "Name": "Delfines SC",
+                      "SportKindName": "Soccer"
+                    },
+                    "AwayTeam": {
+                      "Id": "Leones Azules",
+                      "Name": "Leones Azules",
+                      "SportKindName": "Soccer"
+                    },
+                    "HomeSquad": [],
+                    "AwaySquad": [],
+                    "Events": []
+                  },
+                  {
+                    "Id": "copa-primavera-2026:sf1",
+                    "Date": "2026-03-09",
+                    "HomeTeamScore": "0",
+                    "AwayTeamScore": "0",
+                    "MatchDay": 2,
+                    "MatchDayName": "semifinal",
+                    "Status": 0,
+                    "Order": 2,
+                    "HomeTeam": {
+                      "Id": "Pumas FC",
+                      "Name": "Pumas FC",
+                      "SportKindName": "Soccer"
+                    },
+                    "AwayTeam": {
+                      "Id": "Condores SC",
+                      "Name": "Condores SC",
+                      "SportKindName": "Soccer"
+                    },
+                    "HomeSquad": [],
+                    "AwaySquad": [],
+                    "Events": []
+                  },
+                  {
+                    "Id": "copa-primavera-2026:sf2",
+                    "Date": "2026-03-09",
+                    "HomeTeamScore": "0",
+                    "AwayTeamScore": "0",
+                    "MatchDay": 2,
+                    "MatchDayName": "semifinal",
+                    "Status": 0,
+                    "Order": 3,
+                    "HomeTeam": {
+                      "Id": "Panteras CF",
+                      "Name": "Panteras CF",
+                      "SportKindName": "Soccer"
+                    },
+                    "AwayTeam": {
+                      "Id": "Delfines SC",
+                      "Name": "Delfines SC",
+                      "SportKindName": "Soccer"
+                    },
+                    "HomeSquad": [],
+                    "AwaySquad": [],
+                    "Events": []
+                  },
+                  {
+                    "Id": "copa-primavera-2026:3rd-place",
+                    "Date": "2026-03-09",
+                    "HomeTeamScore": "0",
+                    "AwayTeamScore": "0",
+                    "MatchDay": 3,
+                    "MatchDayName": "3rd_place_playoff",
+                    "Status": 0,
+                    "Order": null,
+                    "HomeTeam": {
+                      "Id": "Condores SC",
+                      "Name": "Condores SC",
+                      "SportKindName": "Soccer"
+                    },
+                    "AwayTeam": {
+                      "Id": "Delfines SC",
+                      "Name": "Delfines SC",
+                      "SportKindName": "Soccer"
+                    },
+                    "HomeSquad": [],
+                    "AwaySquad": [],
+                    "Events": []
+                  },
+                  {
+                    "Id": "copa-primavera-2026:final",
+                    "Date": "2026-03-09",
+                    "HomeTeamScore": "0",
+                    "AwayTeamScore": "0",
+                    "MatchDay": 3,
+                    "MatchDayName": "final",
+                    "Status": 0,
+                    "Order": 1,
+                    "HomeTeam": {
+                      "Id": "Pumas FC",
+                      "Name": "Pumas FC",
+                      "SportKindName": "Soccer"
+                    },
+                    "AwayTeam": {
+                      "Id": "Panteras CF",
+                      "Name": "Panteras CF",
+                      "SportKindName": "Soccer"
+                    },
+                    "HomeSquad": [],
+                    "AwaySquad": [],
+                    "Events": []
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eval Review</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&family=Lora:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js" integrity="sha384-EnyY0/GSHQGSxSgMwaIPzSESbqoOLSexfnSMN2AP+39Ckmn92stwABZynq1JyzdT" crossorigin="anonymous"></script>
+  <style>
+    :root {
+      --bg: #faf9f5;
+      --surface: #ffffff;
+      --border: #e8e6dc;
+      --text: #141413;
+      --text-muted: #b0aea5;
+      --accent: #d97757;
+      --accent-hover: #c4613f;
+      --green: #788c5d;
+      --green-bg: #eef2e8;
+      --red: #c44;
+      --red-bg: #fceaea;
+      --header-bg: #141413;
+      --header-text: #faf9f5;
+      --radius: 6px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Lora', Georgia, serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ---- Header ---- */
+    .header {
+      background: var(--header-bg);
+      color: var(--header-text);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .header h1 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+    .header .instructions {
+      font-size: 0.8rem;
+      opacity: 0.7;
+      margin-top: 0.25rem;
+    }
+    .header .progress {
+      font-size: 0.875rem;
+      opacity: 0.8;
+      text-align: right;
+    }
+
+    /* ---- Main content ---- */
+    .main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    /* ---- Sections ---- */
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      flex-shrink: 0;
+    }
+    .section-header {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.75rem 1rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .section-body {
+      padding: 1rem;
+    }
+
+    /* ---- Config badge ---- */
+    .config-badge {
+      display: inline-block;
+      padding: 0.2rem 0.625rem;
+      border-radius: 9999px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-left: 0.75rem;
+      vertical-align: middle;
+    }
+    .config-badge.config-primary {
+      background: rgba(33, 150, 243, 0.12);
+      color: #1976d2;
+    }
+    .config-badge.config-baseline {
+      background: rgba(255, 193, 7, 0.15);
+      color: #f57f17;
+    }
+
+    /* ---- Prompt ---- */
+    .prompt-text {
+      white-space: pre-wrap;
+      font-size: 0.9375rem;
+      line-height: 1.6;
+    }
+
+    /* ---- Outputs ---- */
+    .output-file {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .output-file + .output-file {
+      margin-top: 1rem;
+    }
+    .output-file-header {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      font-family: 'SF Mono', SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .output-file-header .dl-btn {
+      font-size: 0.7rem;
+      color: var(--accent);
+      text-decoration: none;
+      cursor: pointer;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-weight: 500;
+      opacity: 0.8;
+    }
+    .output-file-header .dl-btn:hover {
+      opacity: 1;
+      text-decoration: underline;
+    }
+    .output-file-content {
+      padding: 0.75rem;
+      overflow-x: auto;
+    }
+    .output-file-content pre {
+      font-size: 0.8125rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: 'SF Mono', SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+    }
+    .output-file-content img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 4px;
+    }
+    .output-file-content iframe {
+      width: 100%;
+      height: 600px;
+      border: none;
+    }
+    .output-file-content table {
+      border-collapse: collapse;
+      font-size: 0.8125rem;
+      width: 100%;
+    }
+    .output-file-content table td,
+    .output-file-content table th {
+      border: 1px solid var(--border);
+      padding: 0.375rem 0.5rem;
+      text-align: left;
+    }
+    .output-file-content table th {
+      background: var(--bg);
+      font-weight: 600;
+    }
+    .output-file-content .download-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.875rem;
+      cursor: pointer;
+    }
+    .output-file-content .download-link:hover {
+      background: var(--border);
+    }
+    .empty-state {
+      color: var(--text-muted);
+      font-style: italic;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    /* ---- Feedback ---- */
+    .prev-feedback {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.625rem 0.75rem;
+      margin-top: 0.75rem;
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+    .prev-feedback-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.25rem;
+      color: var(--text-muted);
+    }
+    .feedback-textarea {
+      width: 100%;
+      min-height: 100px;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 0.9375rem;
+      line-height: 1.5;
+      resize: vertical;
+      color: var(--text);
+    }
+    .feedback-textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    .feedback-status {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+      min-height: 1.1em;
+    }
+
+    /* ---- Grades (collapsible) ---- */
+    .grades-toggle {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+    .grades-toggle:hover {
+      color: var(--accent);
+    }
+    .grades-toggle .arrow {
+      margin-right: 0.5rem;
+      transition: transform 0.15s;
+      font-size: 0.75rem;
+    }
+    .grades-toggle .arrow.open {
+      transform: rotate(90deg);
+    }
+    .grades-content {
+      display: none;
+      margin-top: 0.75rem;
+    }
+    .grades-content.open {
+      display: block;
+    }
+    .grades-summary {
+      font-size: 0.875rem;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .grade-badge {
+      display: inline-block;
+      padding: 0.125rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .grade-pass { background: var(--green-bg); color: var(--green); }
+    .grade-fail { background: var(--red-bg); color: var(--red); }
+    .assertion-list {
+      list-style: none;
+    }
+    .assertion-item {
+      padding: 0.625rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.8125rem;
+    }
+    .assertion-item:last-child { border-bottom: none; }
+    .assertion-status {
+      font-weight: 600;
+      margin-right: 0.5rem;
+    }
+    .assertion-status.pass { color: var(--green); }
+    .assertion-status.fail { color: var(--red); }
+    .assertion-evidence {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      margin-top: 0.25rem;
+      padding-left: 1.5rem;
+    }
+
+    /* ---- View tabs ---- */
+    .view-tabs {
+      display: flex;
+      gap: 0;
+      padding: 0 2rem;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .view-tab {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.625rem 1.25rem;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      background: none;
+      color: var(--text-muted);
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s;
+    }
+    .view-tab:hover { color: var(--text); }
+    .view-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+    .view-panel { display: none; }
+    .view-panel.active { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+
+    /* ---- Benchmark view ---- */
+    .benchmark-view {
+      padding: 1.5rem 2rem;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .benchmark-table {
+      border-collapse: collapse;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 0.8125rem;
+      width: 100%;
+      margin-bottom: 1.5rem;
+    }
+    .benchmark-table th, .benchmark-table td {
+      padding: 0.625rem 0.75rem;
+      text-align: left;
+      border: 1px solid var(--border);
+    }
+    .benchmark-table th {
+      font-family: 'Poppins', sans-serif;
+      background: var(--header-bg);
+      color: var(--header-text);
+      font-weight: 500;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .benchmark-table tr:hover { background: var(--bg); }
+    .benchmark-table tr.benchmark-row-with { background: rgba(33, 150, 243, 0.06); }
+    .benchmark-table tr.benchmark-row-without { background: rgba(255, 193, 7, 0.06); }
+    .benchmark-table tr.benchmark-row-with:hover { background: rgba(33, 150, 243, 0.12); }
+    .benchmark-table tr.benchmark-row-without:hover { background: rgba(255, 193, 7, 0.12); }
+    .benchmark-table tr.benchmark-row-avg { font-weight: 600; border-top: 2px solid var(--border); }
+    .benchmark-table tr.benchmark-row-avg.benchmark-row-with { background: rgba(33, 150, 243, 0.12); }
+    .benchmark-table tr.benchmark-row-avg.benchmark-row-without { background: rgba(255, 193, 7, 0.12); }
+    .benchmark-delta-positive { color: var(--green); font-weight: 600; }
+    .benchmark-delta-negative { color: var(--red); font-weight: 600; }
+    .benchmark-notes {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+    }
+    .benchmark-notes h3 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.875rem;
+      margin-bottom: 0.75rem;
+    }
+    .benchmark-notes ul {
+      list-style: disc;
+      padding-left: 1.25rem;
+    }
+    .benchmark-notes li {
+      font-size: 0.8125rem;
+      line-height: 1.6;
+      margin-bottom: 0.375rem;
+    }
+    .benchmark-empty {
+      color: var(--text-muted);
+      font-style: italic;
+      text-align: center;
+      padding: 3rem;
+    }
+
+    /* ---- Navigation ---- */
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+    .nav-btn {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.5rem 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text);
+      transition: all 0.15s;
+    }
+    .nav-btn:hover:not(:disabled) {
+      background: var(--bg);
+      border-color: var(--text-muted);
+    }
+    .nav-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .done-btn {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.5rem 1.5rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+    .done-btn:hover {
+      background: var(--bg);
+      border-color: var(--text-muted);
+    }
+    .done-btn.ready {
+      border: none;
+      background: var(--accent);
+      color: white;
+      font-weight: 600;
+    }
+    .done-btn.ready:hover {
+      background: var(--accent-hover);
+    }
+    /* ---- Done overlay ---- */
+    .done-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+    }
+    .done-overlay.visible {
+      display: flex;
+    }
+    .done-card {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 2rem 3rem;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      max-width: 500px;
+    }
+    .done-card h2 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .done-card p {
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+      line-height: 1.5;
+    }
+    .done-card .btn-row {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+    .done-card button {
+      padding: 0.5rem 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 0.875rem;
+    }
+    .done-card button:hover {
+      background: var(--bg);
+    }
+    /* ---- Toast ---- */
+    .toast {
+      position: fixed;
+      bottom: 5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--header-bg);
+      color: var(--header-text);
+      padding: 0.625rem 1.25rem;
+      border-radius: var(--radius);
+      font-size: 0.875rem;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+      z-index: 200;
+    }
+    .toast.visible {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div id="app" style="height:100vh; display:flex; flex-direction:column;">
+    <div class="header">
+      <div>
+        <h1>Eval Review: <span id="skill-name"></span></h1>
+        <div class="instructions">Review each output and leave feedback below. Navigate with arrow keys or buttons. When done, copy feedback and paste into Claude Code.</div>
+      </div>
+      <div class="progress" id="progress"></div>
+    </div>
+
+    <!-- View tabs (only shown when benchmark data exists) -->
+    <div class="view-tabs" id="view-tabs" style="display:none;">
+      <button class="view-tab active" onclick="switchView('outputs')">Outputs</button>
+      <button class="view-tab" onclick="switchView('benchmark')">Benchmark</button>
+    </div>
+
+    <!-- Outputs panel (qualitative review) -->
+    <div class="view-panel active" id="panel-outputs">
+    <div class="main">
+      <!-- Prompt -->
+      <div class="section">
+        <div class="section-header">Prompt <span class="config-badge" id="config-badge" style="display:none;"></span></div>
+        <div class="section-body">
+          <div class="prompt-text" id="prompt-text"></div>
+        </div>
+      </div>
+
+      <!-- Outputs -->
+      <div class="section">
+        <div class="section-header">Output</div>
+        <div class="section-body" id="outputs-body">
+          <div class="empty-state">No output files found</div>
+        </div>
+      </div>
+
+      <!-- Previous Output (collapsible) -->
+      <div class="section" id="prev-outputs-section" style="display:none;">
+        <div class="section-header">
+          <div class="grades-toggle" onclick="togglePrevOutputs()">
+            <span class="arrow" id="prev-outputs-arrow">&#9654;</span>
+            Previous Output
+          </div>
+        </div>
+        <div class="grades-content" id="prev-outputs-content"></div>
+      </div>
+
+      <!-- Grades (collapsible) -->
+      <div class="section" id="grades-section" style="display:none;">
+        <div class="section-header">
+          <div class="grades-toggle" onclick="toggleGrades()">
+            <span class="arrow" id="grades-arrow">&#9654;</span>
+            Formal Grades
+          </div>
+        </div>
+        <div class="grades-content" id="grades-content"></div>
+      </div>
+
+      <!-- Feedback -->
+      <div class="section">
+        <div class="section-header">Your Feedback</div>
+        <div class="section-body">
+          <textarea
+            class="feedback-textarea"
+            id="feedback"
+            placeholder="What do you think of this output? Any issues, suggestions, or things that look great?"
+          ></textarea>
+          <div class="feedback-status" id="feedback-status"></div>
+          <div class="prev-feedback" id="prev-feedback" style="display:none;">
+            <div class="prev-feedback-label">Previous feedback</div>
+            <div id="prev-feedback-text"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav" id="outputs-nav">
+      <button class="nav-btn" id="prev-btn" onclick="navigate(-1)">&#8592; Previous</button>
+      <button class="done-btn" id="done-btn" onclick="showDoneDialog()">Submit All Reviews</button>
+      <button class="nav-btn" id="next-btn" onclick="navigate(1)">Next &#8594;</button>
+    </div>
+    </div><!-- end panel-outputs -->
+
+    <!-- Benchmark panel (quantitative stats) -->
+    <div class="view-panel" id="panel-benchmark">
+      <div class="benchmark-view" id="benchmark-content">
+        <div class="benchmark-empty">No benchmark data available. Run a benchmark to see quantitative results here.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Done overlay -->
+  <div class="done-overlay" id="done-overlay">
+    <div class="done-card">
+      <h2>Review Complete</h2>
+      <p>Your feedback has been saved. Go back to your Claude Code session and tell Claude you're done reviewing.</p>
+      <div class="btn-row">
+        <button onclick="closeDoneDialog()">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ---- Embedded data (injected by generate_review.py) ----
+    const EMBEDDED_DATA = {"skill_name": "tournament-import", "runs": [{"id": "ps23-parse-with-penalties-with_skill", "prompt": "I have PS23 Soccer JSON data for a 4-team mini-league called 'Copa Verano 2026' in Mexico. The data includes 6 group stage matches and playoffs (2 semifinals + a final that went to penalties 4-3). Parse this data and generate a valid EasyChamp import JSON file ready for POST /import/league. The PS23 data file is at evals/files/ps23-copa-verano.json. Use the existing PS23 parser if available, or generate the import JSON manually following EasyChamp's import format.", "eval_id": 1, "outputs": [{"name": "copa-verano-2026-import.json", "type": "text", "content": "{\n  \"ImportSource\": 99,\n  \"ImportMode\": 0,\n  \"League\": {\n    \"Name\": \"Liga Recreativa MX\",\n    \"Country\": \"Mexico\",\n    \"SportKindName\": \"Soccer\",\n    \"ImageUrl\": null,\n    \"Champs\": [\n      {\n        \"Name\": \"Copa Verano 2026\",\n        \"ExternalId\": \"ps23:comp:copa-verano-2026\",\n        \"StartDate\": \"2026-01-10\",\n        \"EndDate\": \"2026-02-28\",\n        \"IsComplete\": true,\n        \"SportKindName\": \"Soccer\",\n        \"LeagueName\": \"Liga Recreativa MX\",\n        \"Teams\": [\n          {\n            \"Id\": \"ps23:team:c34e2a554438\",\n            \"Name\": \"Tigres FC\",\n            \"ImageUrl\": \"https://ps23soccer.com/webfiles/ps23/escudos/142.png\",\n            \"SportKindName\": \"Soccer\",\n            \"TeamMembers\": [\n              {\n                \"Player\": {\n                  \"FullName\": \"R. Gutierrez\",\n                  \"Id\": \"ps23:player:bd87eef0fa0f\",\n                  \"FirstName\": \"R.\",\n                  \"LastName\": \"Gutierrez\",\n                  \"OtherFullName\": \"\",\n                  \"SportKindName\": \"Soccer\"\n                }\n              },\n              {\n                \"Player\": {\n                  \"FullName\": \"M. Salazar\",\n                  \"Id\": \"ps23:player:3aa4178f7919\",\n                  \"FirstName\": \"M.\",\n                  \"LastName\": \"Salazar\",\n                  \"OtherFullName\": \"\",\n                  \"SportKindName\": \"Soccer\"\n                }\n              },\n              {\n                \"Player\": {\n                  \"FullName\": \"A. Torres\",\n                  \"Id\": \"ps23:player:1475a4f87636\",\n                  \"FirstName\": \"A.\",\n                  \"LastName\": \"Torres\",\n                  \"OtherFullName\": \"\",\n                  \"SportKindName\": \"Soccer\"\n                }\n              },\n              {\n                \"Player\": {\n                  \"FullName\": \"L. Navarro\",\n                  \"Id\": \"ps23:player:b05ea7ba184e\",\n                  \"FirstName\": \"L.\",\n                  \"LastName\": \"Navarro\",\n                  \"OtherFullName\": \"\",\n                  \"SportKindName\": \"Soccer\"\n                }\n              }\n            ]\n          },\n          {\n            \"Id\": \"ps23:team:43c73130bd0f\",\n            \"Name\": \"Lobos Rojos\",\n            \"ImageUrl\": \"https://ps23soccer.com/webfiles/ps23/escudos/187.png\",\n            \"SportKindName\": \"Soccer\",\n            \"TeamMembers\": [\n              {\n                \"Player\": {\n                  \"FullName\": \"J. Mendez\",\n                  \"Id\": \"ps23:player:dd0debb0279f\",\n                  \"FirstName\": \"J.\",\n                  \"LastName\": \"Mendez\",\n                  \"OtherFullName\": \"\",\n                  \"SportKindName\": \"Soccer\"\n                }\n              },\n              {\n                \"Player\": {\n                  \"FullName\": \"F. Reyes\",\n                  \"Id\": \"ps23:player:d7a3b4fab622\",\n                  \"FirstName\": \"F.\",\n                  \"LastName\": \"Reyes\",\n                  \"OtherFullName\": \"\",\n                  \"SportKindName\": \"Soccer\"\n                }\n              }\n            ]\n          },\n          {\n            \"Id\": \"ps23:team:45aa17d9e673\",\n            \"Name\": \"Aguilas Doradas\",\n            \"ImageUrl\": \"https://ps23soccer.com/webfiles/ps23/escudos/203.png\",\n            \"SportKindName\": \"Soccer\",\n            \"TeamMembers\": [\n              {\n                \"Player\": {\n                  \"FullName\": \"C. Vargas\",\n                  \"Id\": \"ps23:player:e17b7add03ea\",\n                  \"FirstName\": \"C.\",\n                  \"LastName\": \"Vargas\",\n                  \"OtherFullName\": \"\",\n                  \"SportKindName\": \"Soccer\"\n                }\n              },\n              {\n                \"Player\": {\n                  \"FullName\": \"E. Luna\",\n                  \"Id\": \"ps23:player:b9824d87171b\",\n                  \"FirstName\": \"E.\",\n                  \"LastName\": \"Luna\",\n                  \"OtherFullName\": \"\",\n                  \"SportKindName\": \"Soccer\"\n                }\n              }\n            ]\n          },\n          {\n            \"Id\": \"ps23:team:aec55b6d6ac2\",\n            \"Name\": \"Halcones CF\",\n            \"ImageUrl\": \"https://ps23soccer.com/webfiles/ps23/escudos/156.png\",\n            \"SportKindName\": \"Soccer\",\n            \"TeamMembers\": [\n              {\n                \"Player\": {\n                  \"FullName\": \"P. Romero\",\n                  \"Id\": \"ps23:player:3cf6721de59e\",\n                  \"FirstName\": \"P.\",\n                  \"LastName\": \"Romero\",\n                  \"OtherFullName\": \"\",\n                  \"SportKindName\": \"Soccer\"\n                }\n              },\n              {\n                \"Player\": {\n                  \"FullName\": \"D. Castillo\",\n                  \"Id\": \"ps23:player:e00d9b3c6b41\",\n                  \"FirstName\": \"D.\",\n                  \"LastName\": \"Castillo\",\n                  \"OtherFullName\": \"\",\n                  \"SportKindName\": \"Soccer\"\n                }\n              },\n              {\n                \"Player\": {\n                  \"FullName\": \"S. Herrera\",\n                  \"Id\": \"ps23:player:2e9d8d4f617d\",\n                  \"FirstName\": \"S.\",\n                  \"LastName\": \"Herrera\",\n                  \"OtherFullName\": \"\",\n                  \"SportKindName\": \"Soccer\"\n                }\n              }\n            ]\n          }\n        ],\n        \"Stages\": [\n          {\n            \"Name\": \"Group Stage\",\n            \"Type\": \"League\",\n            \"Groups\": [\n              {\n                \"Name\": \"Group A\",\n                \"Fixtures\": [\n                  {\n                    \"Id\": \"ps23:fixture:tigres-fc-vs-lobos-rojos-1\",\n                    \"Date\": \"2026-01-10\",\n                    \"HomeTeamScore\": \"3\",\n                    \"AwayTeamScore\": \"1\",\n                    \"HomePenaltyScore\": null,\n                    \"AwayPenaltyScore\": null,\n                    \"HasPenalties\": false,\n                    \"HasOvertime\": false,\n                    \"MatchDay\": 1,\n                    \"MatchDayName\": \"1\",\n                    \"Status\": 2,\n                    \"Order\": null,\n                    \"WinnerTeamId\": null,\n                    \"HomeTeam\": {\n                      \"Id\": \"ps23:team:c34e2a554438\",\n                      \"Name\": \"Tigres FC\",\n                      \"ImageUrl\": \"https://ps23soccer.com/webfiles/ps23/escudos/142.png\",\n                      \"SportKindName\": \"Soccer\"\n                    },\n                    \"AwayTeam\": {\n                      \"Id\": \"ps23:team:43c73130bd0f\",\n                      \"Name\": \"Lobos Rojos\",\n                      \"ImageUrl\": \"https://ps23soccer.com/webfiles/ps23/escudos/187.png\",\n                      \"SportKindName\": \"Soccer\"\n                    },\n                    \"HomeSquad\": [\n                      {\n                        \"Player\": {\n                          \"FullName\": \"R. Gutierrez\",\n                          \"Id\": \"ps23:player:bd87eef0fa0f\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"SquadType\": 0,\n                        \"IsPlayed\": true\n                      },\n                      {\n                        \"Player\": {\n                          \"FullName\": \"M. Salazar\",\n                          \"Id\": \"ps23:player:3aa4178f7919\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"SquadType\": 0,\n                        \"IsPlayed\": true\n                      },\n                      {\n                        \"Player\": {\n                          \"FullName\": \"A. Torres\",\n                          \"Id\": \"ps23:player:1475a4f87636\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"SquadType\": 0,\n                        \"IsPlayed\": true\n                      },\n                      {\n                        \"Player\": {\n                          \"FullName\": \"L. Navarro\",\n                          \"Id\": \"ps23:player:b05ea7ba184e\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"SquadType\": 0,\n                        \"IsPlayed\": true\n                      }\n                    ],\n                    \"AwaySquad\": [\n                      {\n                        \"Player\": {\n                          \"FullName\": \"J. Mendez\",\n                          \"Id\": \"ps23:player:dd0debb0279f\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"SquadType\": 0,\n                        \"IsPlayed\": true\n                      },\n                      {\n                        \"Player\": {\n                          \"FullName\": \"F. Reyes\",\n                          \"Id\": \"ps23:player:d7a3b4fab622\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"SquadType\": 0,\n                        \"IsPlayed\": true\n                      }\n                    ],\n                    \"Events\": [\n                      {\n                        \"IsHomeEvent\": true,\n                        \"Minute\": \"5\",\n                        \"EventType\": \"scorer\",\n                        \"Player\": {\n                          \"FullName\": \"R. Gutierrez\",\n                          \"Id\": \"ps23:player:bd87eef0fa0f\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"Description\": \"Goal by R. Gutierrez\"\n                      },\n                      {\n                        \"IsHomeEvent\": true,\n                        \"Minute\": \"10\",\n                        \"EventType\": \"scorer\",\n                        \"Player\": {\n                          \"FullName\": \"R. Gutierrez\",\n                          \"Id\": \"ps23:player:bd87eef0fa0f\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"Description\": \"Goal by R. Gutierrez\"\n                      },\n                      {\n                        \"IsHomeEvent\": true,\n                        \"Minute\": \"15\",\n                        \"EventType\": \"scorer\",\n                        \"Player\": {\n                          \"FullName\": \"M. Salazar\",\n                          \"Id\": \"ps23:player:3aa4178f7919\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"Description\": \"Goal by M. Salazar\"\n                      },\n                      {\n                        \"IsHomeEvent\": false,\n                        \"Minute\": \"20\",\n                        \"EventType\": \"scorer\",\n                        \"Player\": {\n                          \"FullName\": \"J. Mendez\",\n                          \"Id\": \"ps23:player:dd0debb0279f\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"Description\": \"Goal by J. Mendez\"\n                      }\n                    ]\n                  },\n                  {\n                    \"Id\": \"ps23:fixture:aguilas-doradas-vs-halcones-cf-1\",\n                    \"Date\": \"2026-01-10\",\n                    \"HomeTeamScore\": \"0\",\n                    \"AwayTeamScore\": \"2\",\n                    \"HomePenaltyScore\": null,\n                    \"AwayPenaltyScore\": null,\n                    \"HasPenalties\": false,\n                    \"HasOvertime\": false,\n                    \"MatchDay\": 1,\n                    \"MatchDayName\": \"1\",\n                    \"Status\": 2,\n                    \"Order\": null,\n                    \"WinnerTeamId\": null,\n                    \"HomeTeam\": {\n                      \"Id\": \"ps23:team:45aa17d9e673\",\n                      \"Name\": \"Aguilas Doradas\",\n                      \"ImageUrl\": \"https://ps23soccer.com/webfiles/ps23/escudos/203.png\",\n                      \"SportKindName\": \"Soccer\"\n                    },\n                    \"AwayTeam\": {\n                      \"Id\": \"ps23:team:aec55b6d6ac2\",\n                      \"Name\": \"Halcones CF\",\n                      \"ImageUrl\": \"https://ps23soccer.com/webfiles/ps23/escudos/156.png\",\n                      \"SportKindName\": \"Soccer\"\n                    },\n                    \"HomeSquad\": [\n                      {\n                        \"Player\": {\n                          \"FullName\": \"C. Vargas\",\n                          \"Id\": \"ps23:player:e17b7add03ea\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"SquadType\": 0,\n                        \"IsPlayed\": true\n                      },\n                      {\n                        \"Player\": {\n                          \"FullName\": \"E. Luna\",\n                          \"Id\": \"ps23:player:b9824d87171b\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"SquadType\": 0,\n                        \"IsPlayed\": true\n                      }\n                    ],\n                    \"AwaySquad\": [\n                      {\n                        \"Player\": {\n                          \"FullName\": \"P. Romero\",\n                          \"Id\": \"ps23:player:3cf6721de59e\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"SquadType\": 0,\n                        \"IsPlayed\": true\n                      },\n                      {\n                        \"Player\": {\n                          \"FullName\": \"D. Castillo\",\n                          \"Id\": \"ps23:player:e00d9b3c6b41\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"SquadType\": 0,\n                        \"IsPlayed\": true\n                      },\n                      {\n                        \"Player\": {\n                          \"FullName\": \"S. Herrera\",\n                          \"Id\": \"ps23:player:2e9d8d4f617d\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"SquadType\": 0,\n                        \"IsPlayed\": true\n                      }\n                    ],\n                    \"Events\": [\n                      {\n                        \"IsHomeEvent\": false,\n                        \"Minute\": \"5\",\n                        \"EventType\": \"scorer\",\n                        \"Player\": {\n                          \"FullName\": \"P. Romero\",\n                          \"Id\": \"ps23:player:3cf6721de59e\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"Description\": \"Goal by P. Romero\"\n                      },\n                      {\n                        \"IsHomeEvent\": false,\n                        \"Minute\": \"10\",\n                        \"EventType\": \"scorer\",\n                        \"Player\": {\n                          \"FullName\": \"D. Castillo\",\n                          \"Id\": \"ps23:player:e00d9b3c6b41\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"Description\": \"Goal by D. Castillo\"\n                      }\n                    ]\n                  },\n                  {\n                    \"Id\": \"ps23:fixture:lobos-rojos-vs-aguilas-doradas-2\",\n                    \"Date\": \"2026-01-17\",\n                    \"HomeTeamScore\": \"1\",\n                    \"AwayTeamScore\": \"1\",\n                    \"HomePenaltyScore\": null,\n                    \"AwayPenaltyScore\": null,\n                    \"HasPenalties\": false,\n                    \"HasOvertime\": false,\n                    \"MatchDay\": 2,\n                    \"MatchDayName\": \"2\",\n                    \"Status\": 2,\n                    \"Order\": null,\n                    \"WinnerTeamId\": null,\n                    \"HomeTeam\": {\n                      \"Id\": \"ps23:team:43c73130bd0f\",\n                      \"Name\": \"Lobos Rojos\",\n                      \"ImageUrl\": \"https://ps23soccer.com/webfiles/ps23/escudos/187.png\",\n                      \"SportKindName\": \"Soccer\"\n                    },\n                    \"AwayTeam\": {\n                      \"Id\": \"ps23:team:45aa17d9e673\",\n                      \"Name\": \"Aguilas Doradas\",\n                      \"ImageUrl\": \"https://ps23soccer.com/webfiles/ps23/escudos/203.png\",\n                      \"SportKindName\": \"Soccer\"\n                    },\n                    \"HomeSquad\": [\n                      {\n                        \"Player\": {\n                          \"FullName\": \"J. Mendez\",\n                          \"Id\": \"ps23:player:dd0debb0279f\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"SquadType\": 0,\n                        \"IsPlayed\": true\n                      },\n                      {\n                        \"Player\": {\n                          \"FullName\": \"F. Reyes\",\n                          \"Id\": \"ps23:player:d7a3b4fab622\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"SquadType\": 0,\n                        \"IsPlayed\": true\n                      }\n                    ],\n                    \"AwaySquad\": [\n                      {\n                        \"Player\": {\n                          \"FullName\": \"C. Vargas\",\n                          \"Id\": \"ps23:player:e17b7add03ea\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"SquadType\": 0,\n                        \"IsPlayed\": true\n                      },\n                      {\n                        \"Player\": {\n                          \"FullName\": \"E. Luna\",\n                          \"Id\": \"ps23:player:b9824d87171b\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"SquadType\": 0,\n                        \"IsPlayed\": true\n                      }\n                    ],\n                    \"Events\": [\n                      {\n                        \"IsHomeEvent\": true,\n                        \"Minute\": \"5\",\n                        \"EventType\": \"scorer\",\n                        \"Player\": {\n                          \"FullName\": \"J. Mendez\",\n                          \"Id\": \"ps23:player:dd0debb0279f\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"Description\": \"Goal by J. Mendez\"\n                      },\n                      {\n                        \"IsHomeEvent\": false,\n                        \"Minute\": \"10\",\n                        \"EventType\": \"scorer\",\n                        \"Player\": {\n                          \"FullName\": \"C. Vargas\",\n                          \"Id\": \"ps23:player:e17b7add03ea\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"Description\": \"Goal by C. Vargas\"\n                      }\n                    ]\n                  },\n                  {\n                    \"Id\": \"ps23:fixture:halcones-cf-vs-tigres-fc-2\",\n                    \"Date\": \"2026-01-17\",\n                    \"HomeTeamScore\": \"2\",\n                    \"AwayTeamScore\": \"2\",\n                    \"HomePenaltyScore\": null,\n                    \"AwayPenaltyScore\": null,\n                    \"HasPenalties\": false,\n                    \"HasOvertime\": false,\n                    \"MatchDay\": 2,\n                    \"MatchDayName\": \"2\",\n                    \"Status\": 2,\n                    \"Order\": null,\n                    \"WinnerTeamId\": null,\n                    \"HomeTeam\": {\n                      \"Id\": \"ps23:team:aec55b6d6ac2\",\n                      \"Name\": \"Halcones CF\",\n                      \"ImageUrl\": \"https://ps23soccer.com/webfiles/ps23/escudos/156.png\",\n                      \"SportKindName\": \"Soccer\"\n                    },\n                    \"AwayTeam\": {\n                      \"Id\": \"ps23:team:c34e2a554438\",\n                      \"Name\": \"Tigres FC\",\n                      \"ImageUrl\": \"https://ps23soccer.com/webfiles/ps23/escudos/142.png\",\n                      \"SportKindName\": \"Soccer\"\n                    },\n                    \"HomeSquad\": [\n                      {\n                        \"Player\": {\n                          \"FullName\": \"P. Romero\",\n                          \"Id\": \"ps23:player:3cf6721de59e\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"SquadType\": 0,\n                        \"IsPlayed\": true\n                      },\n                      {\n                        \"Player\": {\n                          \"FullName\": \"D. Castillo\",\n                          \"Id\": \"ps23:player:e00d9b3c6b41\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"SquadType\": 0,\n                        \"IsPlayed\": true\n                      },\n                      {\n                        \"Player\": {\n                          \"FullName\": \"S. Herrera\",\n                          \"Id\": \"ps23:player:2e9d8d4f617d\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"SquadType\": 0,\n                        \"IsPlayed\": true\n                      }\n                    ],\n                    \"AwaySquad\": [\n                      {\n                        \"Player\": {\n                          \"FullName\": \"R. Gutierrez\",\n                          \"Id\": \"ps23:player:bd87eef0fa0f\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"SquadType\": 0,\n                        \"IsPlayed\": true\n                      },\n                      {\n                        \"Player\": {\n                          \"FullName\": \"M. Salazar\",\n                          \"Id\": \"ps23:player:3aa4178f7919\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"SquadType\": 0,\n                        \"IsPlayed\": true\n                      },\n                      {\n                        \"Player\": {\n                          \"FullName\": \"A. Torres\",\n                          \"Id\": \"ps23:player:1475a4f87636\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"SquadType\": 0,\n                        \"IsPlayed\": true\n                      },\n                      {\n                        \"Player\": {\n                          \"FullName\": \"L. Navarro\",\n                          \"Id\": \"ps23:player:b05ea7ba184e\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"SquadType\": 0,\n                        \"IsPlayed\": true\n                      }\n                    ],\n                    \"Events\": [\n                      {\n                        \"IsHomeEvent\": true,\n                        \"Minute\": \"5\",\n                        \"EventType\": \"scorer\",\n                        \"Player\": {\n                          \"FullName\": \"P. Romero\",\n                          \"Id\": \"ps23:player:3cf6721de59e\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"Description\": \"Goal by P. Romero\"\n                      },\n                      {\n                        \"IsHomeEvent\": true,\n                        \"Minute\": \"10\",\n                        \"EventType\": \"scorer\",\n                        \"Player\": {\n                          \"FullName\": \"D. Castillo\",\n                          \"Id\": \"ps23:player:e00d9b3c6b41\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"Description\": \"Goal by D. Castillo\"\n                      },\n                      {\n                        \"IsHomeEvent\": false,\n                        \"Minute\": \"15\",\n                        \"EventType\": \"scorer\",\n                        \"Player\": {\n                          \"FullName\": \"R. Gutierrez\",\n                          \"Id\": \"ps23:player:bd87eef0fa0f\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"Description\": \"Goal by R. Gutierrez\"\n                      },\n                      {\n                        \"IsHomeEvent\": false,\n                        \"Minute\": \"20\",\n                        \"EventType\": \"scorer\",\n                        \"Player\": {\n                          \"FullName\": \"M. Salazar\",\n                          \"Id\": \"ps23:player:3aa4178f7919\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"Description\": \"Goal by M. Salazar\"\n                      }\n                    ]\n                  },\n                  {\n                    \"Id\": \"ps23:fixture:tigres-fc-vs-aguilas-doradas-3\",\n                    \"Date\": \"2026-01-24\",\n                    \"HomeTeamScore\": \"4\",\n                    \"AwayTeamScore\": \"0\",\n                    \"HomePenaltyScore\": null,\n                    \"AwayPenaltyScore\": null,\n                    \"HasPenalties\": false,\n                    \"HasOvertime\": false,\n                    \"MatchDay\": 3,\n                    \"MatchDayName\": \"3\",\n                    \"Status\": 2,\n                    \"Order\": null,\n                    \"WinnerTeamId\": null,\n                    \"HomeTeam\": {\n                      \"Id\": \"ps23:team:c34e2a554438\",\n                      \"Name\": \"Tigres FC\",\n                      \"ImageUrl\": \"https://ps23soccer.com/webfiles/ps23/escudos/142.png\",\n                      \"SportKindName\": \"Soccer\"\n                    },\n                    \"AwayTeam\": {\n                      \"Id\": \"ps23:team:45aa17d9e673\",\n                      \"Name\": \"Aguilas Doradas\",\n                      \"ImageUrl\": \"https://ps23soccer.com/webfiles/ps23/escudos/203.png\",\n                      \"SportKindName\": \"Soccer\"\n                    },\n                    \"HomeSquad\": [\n                      {\n                        \"Player\": {\n                          \"FullName\": \"R. Gutierrez\",\n                          \"Id\": \"ps23:player:bd87eef0fa0f\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"SquadType\": 0,\n                        \"IsPlayed\": true\n                      },\n                      {\n                        \"Player\": {\n                          \"FullName\": \"M. Salazar\",\n                          \"Id\": \"ps23:player:3aa4178f7919\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"SquadType\": 0,\n                        \"IsPlayed\": true\n                      },\n                      {\n                        \"Player\": {\n                          \"FullName\": \"A. Torres\",\n                          \"Id\": \"ps23:player:1475a4f87636\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"SquadType\": 0,\n                        \"IsPlayed\": true\n                      },\n                      {\n                        \"Player\": {\n                          \"FullName\": \"L. Navarro\",\n                          \"Id\": \"ps23:player:b05ea7ba184e\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"SquadType\": 0,\n                        \"IsPlayed\": true\n                      }\n                    ],\n                    \"AwaySquad\": [\n                      {\n                        \"Player\": {\n                          \"FullName\": \"C. Vargas\",\n                          \"Id\": \"ps23:player:e17b7add03ea\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"SquadType\": 0,\n                        \"IsPlayed\": true\n                      },\n                      {\n                        \"Player\": {\n                          \"FullName\": \"E. Luna\",\n                          \"Id\": \"ps23:player:b9824d87171b\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"SquadType\": 0,\n                        \"IsPlayed\": true\n                      }\n                    ],\n                    \"Events\": [\n                      {\n                        \"IsHomeEvent\": true,\n                        \"Minute\": \"5\",\n                        \"EventType\": \"scorer\",\n                        \"Player\": {\n                          \"FullName\": \"R. Gutierrez\",\n                          \"Id\": \"ps23:player:bd87eef0fa0f\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"Description\": \"Goal by R. Gutierrez\"\n                      },\n                      {\n                        \"IsHomeEvent\": true,\n                        \"Minute\": \"10\",\n                        \"EventType\": \"scorer\",\n                        \"Player\": {\n                          \"FullName\": \"R. Gutierrez\",\n                          \"Id\": \"ps23:player:bd87eef0fa0f\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"Description\": \"Goal by R. Gutierrez\"\n                      },\n                      {\n                        \"IsHomeEvent\": true,\n                        \"Minute\": \"15\",\n                        \"EventType\": \"scorer\",\n                        \"Player\": {\n                          \"FullName\": \"M. Salazar\",\n                          \"Id\": \"ps23:player:3aa4178f7919\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"Description\": \"Goal by M. Salazar\"\n                      },\n                      {\n                        \"IsHomeEvent\": true,\n                        \"Minute\": \"20\",\n                        \"EventType\": \"scorer\",\n                        \"Player\": {\n                          \"FullName\": \"A. Torres\",\n                          \"Id\": \"ps23:player:1475a4f87636\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"Description\": \"Goal by A. Torres\"\n                      }\n                    ]\n                  },\n                  {\n                    \"Id\": \"ps23:fixture:lobos-rojos-vs-halcones-cf-3\",\n                    \"Date\": \"2026-01-24\",\n                    \"HomeTeamScore\": \"0\",\n                    \"AwayTeamScore\": \"1\",\n                    \"HomePenaltyScore\": null,\n                    \"AwayPenaltyScore\": null,\n                    \"HasPenalties\": false,\n                    \"HasOvertime\": false,\n                    \"MatchDay\": 3,\n                    \"MatchDayName\": \"3\",\n                    \"Status\": 2,\n                    \"Order\": null,\n                    \"WinnerTeamId\": null,\n                    \"HomeTeam\": {\n                      \"Id\": \"ps23:team:43c73130bd0f\",\n                      \"Name\": \"Lobos Rojos\",\n                      \"ImageUrl\": \"https://ps23soccer.com/webfiles/ps23/escudos/187.png\",\n                      \"SportKindName\": \"Soccer\"\n                    },\n                    \"AwayTeam\": {\n                      \"Id\": \"ps23:team:aec55b6d6ac2\",\n                      \"Name\": \"Halcones CF\",\n                      \"ImageUrl\": \"https://ps23soccer.com/webfiles/ps23/escudos/156.png\",\n                      \"SportKindName\": \"Soccer\"\n                    },\n                    \"HomeSquad\": [\n                      {\n                        \"Player\": {\n                          \"FullName\": \"J. Mendez\",\n                          \"Id\": \"ps23:player:dd0debb0279f\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"SquadType\": 0,\n                        \"IsPlayed\": true\n                      },\n                      {\n                        \"Player\": {\n                          \"FullName\": \"F. Reyes\",\n                          \"Id\": \"ps23:player:d7a3b4fab622\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"SquadType\": 0,\n                        \"IsPlayed\": true\n                      }\n                    ],\n                    \"AwaySquad\": [\n                      {\n                        \"Player\": {\n                          \"FullName\": \"P. Romero\",\n                          \"Id\": \"ps23:player:3cf6721de59e\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"SquadType\": 0,\n                        \"IsPlayed\": true\n                      },\n                      {\n                        \"Player\": {\n                          \"FullName\": \"D. Castillo\",\n                          \"Id\": \"ps23:player:e00d9b3c6b41\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"SquadType\": 0,\n                        \"IsPlayed\": true\n                      },\n                      {\n                        \"Player\": {\n                          \"FullName\": \"S. Herrera\",\n                          \"Id\": \"ps23:player:2e9d8d4f617d\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"SquadType\": 0,\n                        \"IsPlayed\": true\n                      }\n                    ],\n                    \"Events\": [\n                      {\n                        \"IsHomeEvent\": false,\n                        \"Minute\": \"5\",\n                        \"EventType\": \"scorer\",\n                        \"Player\": {\n                          \"FullName\": \"P. Romero\",\n                          \"Id\": \"ps23:player:3cf6721de59e\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"Description\": \"Goal by P. Romero\"\n                      }\n                    ]\n                  }\n                ]\n              }\n            ]\n          },\n          {\n            \"Name\": \"Playoffs\",\n            \"Type\": \"Playoff\",\n            \"Groups\": [\n              {\n                \"Name\": \"Playoffs\",\n                \"Fixtures\": [\n                  {\n                    \"Id\": \"ps23:fixture:tigres-fc-vs-halcones-cf-sf1\",\n                    \"Date\": \"2026-02-07\",\n                    \"HomeTeamScore\": \"2\",\n                    \"AwayTeamScore\": \"0\",\n                    \"HomePenaltyScore\": null,\n                    \"AwayPenaltyScore\": null,\n                    \"HasPenalties\": false,\n                    \"HasOvertime\": false,\n                    \"MatchDay\": 1,\n                    \"MatchDayName\": \"semifinal\",\n                    \"Status\": 2,\n                    \"Order\": 2,\n                    \"WinnerTeamId\": null,\n                    \"HomeTeam\": {\n                      \"Id\": \"ps23:team:c34e2a554438\",\n                      \"Name\": \"Tigres FC\",\n                      \"ImageUrl\": \"https://ps23soccer.com/webfiles/ps23/escudos/142.png\",\n                      \"SportKindName\": \"Soccer\"\n                    },\n                    \"AwayTeam\": {\n                      \"Id\": \"ps23:team:aec55b6d6ac2\",\n                      \"Name\": \"Halcones CF\",\n                      \"ImageUrl\": \"https://ps23soccer.com/webfiles/ps23/escudos/156.png\",\n                      \"SportKindName\": \"Soccer\"\n                    },\n                    \"HomeSquad\": [\n                      {\n                        \"Player\": {\n                          \"FullName\": \"R. Gutierrez\",\n                          \"Id\": \"ps23:player:bd87eef0fa0f\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"SquadType\": 0,\n                        \"IsPlayed\": true\n                      },\n                      {\n                        \"Player\": {\n                          \"FullName\": \"M. Salazar\",\n                          \"Id\": \"ps23:player:3aa4178f7919\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"SquadType\": 0,\n                        \"IsPlayed\": true\n                      },\n                      {\n                        \"Player\": {\n                          \"FullName\": \"A. Torres\",\n                          \"Id\": \"ps23:player:1475a4f87636\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"SquadType\": 0,\n                        \"IsPlayed\": true\n                      },\n                      {\n                        \"Player\": {\n                          \"FullName\": \"L. Navarro\",\n                          \"Id\": \"ps23:player:b05ea7ba184e\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"SquadType\": 0,\n                        \"IsPlayed\": true\n                      }\n                    ],\n                    \"AwaySquad\": [\n                      {\n                        \"Player\": {\n                          \"FullName\": \"P. Romero\",\n                          \"Id\": \"ps23:player:3cf6721de59e\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"SquadType\": 0,\n                        \"IsPlayed\": true\n                      },\n                      {\n                        \"Player\": {\n                          \"FullName\": \"D. Castillo\",\n                          \"Id\": \"ps23:player:e00d9b3c6b41\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"SquadType\": 0,\n                        \"IsPlayed\": true\n                      },\n                      {\n                        \"Player\": {\n                          \"FullName\": \"S. Herrera\",\n                          \"Id\": \"ps23:player:2e9d8d4f617d\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"SquadType\": 0,\n                        \"IsPlayed\": true\n                      }\n                    ],\n                    \"Events\": [\n                      {\n                        \"IsHomeEvent\": true,\n                        \"Minute\": \"5\",\n                        \"EventType\": \"scorer\",\n                        \"Player\": {\n                          \"FullName\": \"R. Gutierrez\",\n                          \"Id\": \"ps23:player:bd87eef0fa0f\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"Description\": \"Goal by R. Gutierrez\"\n                      },\n                      {\n                        \"IsHomeEvent\": true,\n                        \"Minute\": \"10\",\n                        \"EventType\": \"scorer\",\n                        \"Player\": {\n                          \"FullName\": \"M. Salazar\",\n                          \"Id\": \"ps23:player:3aa4178f7919\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"Description\": \"Goal by M. Salazar\"\n                      }\n                    ]\n                  },\n                  {\n                    \"Id\": \"ps23:fixture:lobos-rojos-vs-aguilas-doradas-sf2\",\n                    \"Date\": \"2026-02-07\",\n                    \"HomeTeamScore\": \"1\",\n                    \"AwayTeamScore\": \"0\",\n                    \"HomePenaltyScore\": null,\n                    \"AwayPenaltyScore\": null,\n                    \"HasPenalties\": false,\n                    \"HasOvertime\": false,\n                    \"MatchDay\": 1,\n                    \"MatchDayName\": \"semifinal\",\n                    \"Status\": 2,\n                    \"Order\": 3,\n                    \"WinnerTeamId\": null,\n                    \"HomeTeam\": {\n                      \"Id\": \"ps23:team:43c73130bd0f\",\n                      \"Name\": \"Lobos Rojos\",\n                      \"ImageUrl\": \"https://ps23soccer.com/webfiles/ps23/escudos/187.png\",\n                      \"SportKindName\": \"Soccer\"\n                    },\n                    \"AwayTeam\": {\n                      \"Id\": \"ps23:team:45aa17d9e673\",\n                      \"Name\": \"Aguilas Doradas\",\n                      \"ImageUrl\": \"https://ps23soccer.com/webfiles/ps23/escudos/203.png\",\n                      \"SportKindName\": \"Soccer\"\n                    },\n                    \"HomeSquad\": [\n                      {\n                        \"Player\": {\n                          \"FullName\": \"J. Mendez\",\n                          \"Id\": \"ps23:player:dd0debb0279f\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"SquadType\": 0,\n                        \"IsPlayed\": true\n                      },\n                      {\n                        \"Player\": {\n                          \"FullName\": \"F. Reyes\",\n                          \"Id\": \"ps23:player:d7a3b4fab622\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"SquadType\": 0,\n                        \"IsPlayed\": true\n                      }\n                    ],\n                    \"AwaySquad\": [\n                      {\n                        \"Player\": {\n                          \"FullName\": \"C. Vargas\",\n                          \"Id\": \"ps23:player:e17b7add03ea\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"SquadType\": 0,\n                        \"IsPlayed\": true\n                      },\n                      {\n                        \"Player\": {\n                          \"FullName\": \"E. Luna\",\n                          \"Id\": \"ps23:player:b9824d87171b\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"SquadType\": 0,\n                        \"IsPlayed\": true\n                      }\n                    ],\n                    \"Events\": [\n                      {\n                        \"IsHomeEvent\": true,\n                        \"Minute\": \"5\",\n                        \"EventType\": \"scorer\",\n                        \"Player\": {\n                          \"FullName\": \"J. Mendez\",\n                          \"Id\": \"ps23:player:dd0debb0279f\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"Description\": \"Goal by J. Mendez\"\n                      }\n                    ]\n                  },\n                  {\n                    \"Id\": \"ps23:fixture:tigres-fc-vs-lobos-rojos-final\",\n                    \"Date\": \"2026-02-28\",\n                    \"HomeTeamScore\": \"1\",\n                    \"AwayTeamScore\": \"1\",\n                    \"HomePenaltyScore\": \"4\",\n                    \"AwayPenaltyScore\": \"3\",\n                    \"HasPenalties\": true,\n                    \"HasOvertime\": false,\n                    \"MatchDay\": 1,\n                    \"MatchDayName\": \"final\",\n                    \"Status\": 2,\n                    \"Order\": 1,\n                    \"WinnerTeamId\": \"ps23:team:c34e2a554438\",\n                    \"PeriodScores\": [\n                      {\n                        \"HomeScore\": \"1\",\n                        \"AwayScore\": \"1\",\n                        \"Type\": \"regular_period\",\n                        \"Number\": 1\n                      },\n                      {\n                        \"HomeScore\": \"4\",\n                        \"AwayScore\": \"3\",\n                        \"Type\": \"penalties\",\n                        \"Number\": 2\n                      }\n                    ],\n                    \"HomeTeam\": {\n                      \"Id\": \"ps23:team:c34e2a554438\",\n                      \"Name\": \"Tigres FC\",\n                      \"ImageUrl\": \"https://ps23soccer.com/webfiles/ps23/escudos/142.png\",\n                      \"SportKindName\": \"Soccer\"\n                    },\n                    \"AwayTeam\": {\n                      \"Id\": \"ps23:team:43c73130bd0f\",\n                      \"Name\": \"Lobos Rojos\",\n                      \"ImageUrl\": \"https://ps23soccer.com/webfiles/ps23/escudos/187.png\",\n                      \"SportKindName\": \"Soccer\"\n                    },\n                    \"HomeSquad\": [\n                      {\n                        \"Player\": {\n                          \"FullName\": \"R. Gutierrez\",\n                          \"Id\": \"ps23:player:bd87eef0fa0f\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"SquadType\": 0,\n                        \"IsPlayed\": true\n                      },\n                      {\n                        \"Player\": {\n                          \"FullName\": \"M. Salazar\",\n                          \"Id\": \"ps23:player:3aa4178f7919\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"SquadType\": 0,\n                        \"IsPlayed\": true\n                      },\n                      {\n                        \"Player\": {\n                          \"FullName\": \"A. Torres\",\n                          \"Id\": \"ps23:player:1475a4f87636\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"SquadType\": 0,\n                        \"IsPlayed\": true\n                      },\n                      {\n                        \"Player\": {\n                          \"FullName\": \"L. Navarro\",\n                          \"Id\": \"ps23:player:b05ea7ba184e\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"SquadType\": 0,\n                        \"IsPlayed\": true\n                      }\n                    ],\n                    \"AwaySquad\": [\n                      {\n                        \"Player\": {\n                          \"FullName\": \"J. Mendez\",\n                          \"Id\": \"ps23:player:dd0debb0279f\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"SquadType\": 0,\n                        \"IsPlayed\": true\n                      },\n                      {\n                        \"Player\": {\n                          \"FullName\": \"F. Reyes\",\n                          \"Id\": \"ps23:player:d7a3b4fab622\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"SquadType\": 0,\n                        \"IsPlayed\": true\n                      }\n                    ],\n                    \"Events\": [\n                      {\n                        \"IsHomeEvent\": true,\n                        \"Minute\": \"5\",\n                        \"EventType\": \"scorer\",\n                        \"Player\": {\n                          \"FullName\": \"R. Gutierrez\",\n                          \"Id\": \"ps23:player:bd87eef0fa0f\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"Description\": \"Goal by R. Gutierrez\"\n                      },\n                      {\n                        \"IsHomeEvent\": false,\n                        \"Minute\": \"10\",\n                        \"EventType\": \"scorer\",\n                        \"Player\": {\n                          \"FullName\": \"J. Mendez\",\n                          \"Id\": \"ps23:player:dd0debb0279f\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"Description\": \"Goal by J. Mendez\"\n                      }\n                    ]\n                  }\n                ]\n              }\n            ]\n          }\n        ]\n      }\n    ]\n  }\n}"}], "grading": {"expectations": [{"text": "All HomeTeamScore and AwayTeamScore values are strings", "passed": true, "evidence": "Found 18 score values. Types: {'str'}"}, {"text": "HomePenaltyScore and AwayPenaltyScore are strings", "passed": false, "evidence": "Found 18 penalty scores. Types: {'str', 'NoneType'}"}, {"text": "PeriodScores uses Home_score and Away_score (snake_case)", "passed": false, "evidence": "snake_case found: False, camelCase found: True"}, {"text": "PeriodScores Type is lowercase 'penalties'", "passed": true, "evidence": "PeriodScore Type values: ['regular_period', 'penalties']"}, {"text": "EventType is 'scorer' for goals, not 'goal'", "passed": true, "evidence": "Event types found: {'scorer'}"}, {"text": "Every Player object has an OtherFullName field", "passed": true, "evidence": "83/83 players have OtherFullName"}, {"text": "Champs array is nested inside League object", "passed": true, "evidence": "Champs in League: True, Champs at root: False"}, {"text": "The 'R. Gutierrez x2' scorer creates exactly 2 separate goal events", "passed": true, "evidence": "Found 7 R. Gutierrez goal events total across all fixtures"}, {"text": "Output contains both Group Stage (Type: League) and Playoffs (Type: Playoff)", "passed": true, "evidence": "Stage types found: ['League', 'Playoff']"}, {"text": "All scorers appear in their team's squad", "passed": true, "evidence": "No missing scorers in squads"}], "summary": {"passed": 8, "failed": 2, "total": 10, "pass_rate": 0.8}}}, {"id": "ps23-parse-with-penalties-without_skill", "prompt": "I have PS23 Soccer JSON data for a 4-team mini-league called 'Copa Verano 2026' in Mexico. The data includes 6 group stage matches and playoffs (2 semifinals + a final that went to penalties 4-3). Parse this data and generate a valid EasyChamp import JSON file ready for POST /import/league. The PS23 data file is at evals/files/ps23-copa-verano.json. Use the existing PS23 parser if available, or generate the import JSON manually following EasyChamp's import format.", "eval_id": 1, "outputs": [{"name": "copa-verano-2026-import.json", "type": "text", "content": "{\n  \"league\": {\n    \"name\": \"Copa Verano 2026\",\n    \"organization\": \"Liga Recreativa MX\",\n    \"country\": \"Mexico\",\n    \"start_date\": \"2026-01-10\",\n    \"end_date\": \"2026-02-28\",\n    \"type\": \"league\",\n    \"teams_count\": 4\n  },\n  \"teams\": [\n    {\n      \"id\": \"142\",\n      \"name\": \"Tigres FC\"\n    },\n    {\n      \"id\": \"187\",\n      \"name\": \"Lobos Rojos\"\n    },\n    {\n      \"id\": \"203\",\n      \"name\": \"Aguilas Doradas\"\n    },\n    {\n      \"id\": \"156\",\n      \"name\": \"Halcones CF\"\n    }\n  ],\n  \"stages\": [\n    {\n      \"name\": \"Group Stage\",\n      \"type\": \"round_robin\",\n      \"order\": 1,\n      \"standings\": [\n        {\n          \"team_id\": \"142\",\n          \"team_name\": \"Tigres FC\",\n          \"played\": 3,\n          \"wins\": 2,\n          \"draws\": 1,\n          \"losses\": 0,\n          \"goals_for\": 9,\n          \"goals_against\": 3,\n          \"points\": 7,\n          \"goal_difference\": 6,\n          \"position\": 1\n        },\n        {\n          \"team_id\": \"156\",\n          \"team_name\": \"Halcones CF\",\n          \"played\": 3,\n          \"wins\": 2,\n          \"draws\": 1,\n          \"losses\": 0,\n          \"goals_for\": 5,\n          \"goals_against\": 2,\n          \"points\": 7,\n          \"goal_difference\": 3,\n          \"position\": 2\n        },\n        {\n          \"team_id\": \"187\",\n          \"team_name\": \"Lobos Rojos\",\n          \"played\": 3,\n          \"wins\": 0,\n          \"draws\": 1,\n          \"losses\": 2,\n          \"goals_for\": 2,\n          \"goals_against\": 5,\n          \"points\": 1,\n          \"goal_difference\": -3,\n          \"position\": 3\n        },\n        {\n          \"team_id\": \"203\",\n          \"team_name\": \"Aguilas Doradas\",\n          \"played\": 3,\n          \"wins\": 0,\n          \"draws\": 1,\n          \"losses\": 2,\n          \"goals_for\": 1,\n          \"goals_against\": 7,\n          \"points\": 1,\n          \"goal_difference\": -6,\n          \"position\": 4\n        }\n      ],\n      \"matches\": [\n        {\n          \"home_team\": \"Tigres FC\",\n          \"away_team\": \"Lobos Rojos\",\n          \"home_team_id\": \"142\",\n          \"away_team_id\": \"187\",\n          \"home_score\": 3,\n          \"away_score\": 1,\n          \"date\": \"2026-01-10\",\n          \"round\": 1,\n          \"goals\": [\n            {\n              \"player\": \"R. Gutierrez\",\n              \"team\": \"Tigres FC\"\n            },\n            {\n              \"player\": \"R. Gutierrez\",\n              \"team\": \"Tigres FC\"\n            },\n            {\n              \"player\": \"M. Salazar\",\n              \"team\": \"Tigres FC\"\n            },\n            {\n              \"player\": \"J. Mendez\",\n              \"team\": \"Lobos Rojos\"\n            }\n          ]\n        },\n        {\n          \"home_team\": \"Aguilas Doradas\",\n          \"away_team\": \"Halcones CF\",\n          \"home_team_id\": \"203\",\n          \"away_team_id\": \"156\",\n          \"home_score\": 0,\n          \"away_score\": 2,\n          \"date\": \"2026-01-10\",\n          \"round\": 1,\n          \"goals\": [\n            {\n              \"player\": \"P. Romero\",\n              \"team\": \"Halcones CF\"\n            },\n            {\n              \"player\": \"D. Castillo\",\n              \"team\": \"Halcones CF\"\n            }\n          ]\n        },\n        {\n          \"home_team\": \"Lobos Rojos\",\n          \"away_team\": \"Aguilas Doradas\",\n          \"home_team_id\": \"187\",\n          \"away_team_id\": \"203\",\n          \"home_score\": 1,\n          \"away_score\": 1,\n          \"date\": \"2026-01-17\",\n          \"round\": 2,\n          \"goals\": [\n            {\n              \"player\": \"J. Mendez\",\n              \"team\": \"Lobos Rojos\"\n            },\n            {\n              \"player\": \"C. Vargas\",\n              \"team\": \"Aguilas Doradas\"\n            }\n          ]\n        },\n        {\n          \"home_team\": \"Halcones CF\",\n          \"away_team\": \"Tigres FC\",\n          \"home_team_id\": \"156\",\n          \"away_team_id\": \"142\",\n          \"home_score\": 2,\n          \"away_score\": 2,\n          \"date\": \"2026-01-17\",\n          \"round\": 2,\n          \"goals\": [\n            {\n              \"player\": \"P. Romero\",\n              \"team\": \"Halcones CF\"\n            },\n            {\n              \"player\": \"D. Castillo\",\n              \"team\": \"Halcones CF\"\n            },\n            {\n              \"player\": \"R. Gutierrez\",\n              \"team\": \"Tigres FC\"\n            },\n            {\n              \"player\": \"M. Salazar\",\n              \"team\": \"Tigres FC\"\n            }\n          ]\n        },\n        {\n          \"home_team\": \"Tigres FC\",\n          \"away_team\": \"Aguilas Doradas\",\n          \"home_team_id\": \"142\",\n          \"away_team_id\": \"203\",\n          \"home_score\": 4,\n          \"away_score\": 0,\n          \"date\": \"2026-01-24\",\n          \"round\": 3,\n          \"goals\": [\n            {\n              \"player\": \"R. Gutierrez\",\n              \"team\": \"Tigres FC\"\n            },\n            {\n              \"player\": \"R. Gutierrez\",\n              \"team\": \"Tigres FC\"\n            },\n            {\n              \"player\": \"M. Salazar\",\n              \"team\": \"Tigres FC\"\n            },\n            {\n              \"player\": \"A. Torres\",\n              \"team\": \"Tigres FC\"\n            }\n          ]\n        },\n        {\n          \"home_team\": \"Lobos Rojos\",\n          \"away_team\": \"Halcones CF\",\n          \"home_team_id\": \"187\",\n          \"away_team_id\": \"156\",\n          \"home_score\": 0,\n          \"away_score\": 1,\n          \"date\": \"2026-01-24\",\n          \"round\": 3,\n          \"goals\": [\n            {\n              \"player\": \"P. Romero\",\n              \"team\": \"Halcones CF\"\n            }\n          ]\n        }\n      ]\n    },\n    {\n      \"name\": \"Playoffs\",\n      \"type\": \"knockout\",\n      \"order\": 2,\n      \"matches\": [\n        {\n          \"home_team\": \"Tigres FC\",\n          \"away_team\": \"Halcones CF\",\n          \"home_team_id\": \"142\",\n          \"away_team_id\": \"156\",\n          \"home_score\": 2,\n          \"away_score\": 0,\n          \"date\": \"2026-02-07\",\n          \"stage\": \"semifinal\",\n          \"match_number\": 1,\n          \"goals\": [\n            {\n              \"player\": \"R. Gutierrez\",\n              \"team\": \"Tigres FC\"\n            },\n            {\n              \"player\": \"M. Salazar\",\n              \"team\": \"Tigres FC\"\n            }\n          ]\n        },\n        {\n          \"home_team\": \"Lobos Rojos\",\n          \"away_team\": \"Aguilas Doradas\",\n          \"home_team_id\": \"187\",\n          \"away_team_id\": \"203\",\n          \"home_score\": 1,\n          \"away_score\": 0,\n          \"date\": \"2026-02-07\",\n          \"stage\": \"semifinal\",\n          \"match_number\": 2,\n          \"goals\": [\n            {\n              \"player\": \"J. Mendez\",\n              \"team\": \"Lobos Rojos\"\n            }\n          ]\n        },\n        {\n          \"home_team\": \"Tigres FC\",\n          \"away_team\": \"Lobos Rojos\",\n          \"home_team_id\": \"142\",\n          \"away_team_id\": \"187\",\n          \"home_score\": 1,\n          \"away_score\": 1,\n          \"date\": \"2026-02-28\",\n          \"stage\": \"final\",\n          \"match_number\": 1,\n          \"goals\": [\n            {\n              \"player\": \"R. Gutierrez\",\n              \"team\": \"Tigres FC\"\n            },\n            {\n              \"player\": \"J. Mendez\",\n              \"team\": \"Lobos Rojos\"\n            }\n          ],\n          \"penalties\": {\n            \"home_score\": 4,\n            \"away_score\": 3\n          },\n          \"winner\": \"Tigres FC\",\n          \"winner_id\": \"142\"\n        }\n      ]\n    }\n  ]\n}"}], "grading": {"expectations": [{"text": "All HomeTeamScore and AwayTeamScore values are strings", "passed": false, "evidence": "No score fields found"}, {"text": "HomePenaltyScore and AwayPenaltyScore are strings", "passed": false, "evidence": "No penalty score fields found"}, {"text": "PeriodScores uses Home_score and Away_score (snake_case)", "passed": false, "evidence": "snake_case found: False, camelCase found: False"}, {"text": "PeriodScores Type is lowercase 'penalties'", "passed": false, "evidence": "No PeriodScores Type found"}, {"text": "EventType is 'scorer' for goals, not 'goal'", "passed": false, "evidence": "No EventType fields found"}, {"text": "Every Player object has an OtherFullName field", "passed": false, "evidence": "0/0 players have OtherFullName"}, {"text": "Champs array is nested inside League object", "passed": false, "evidence": "Champs in League: False, Champs at root: False"}, {"text": "The 'R. Gutierrez x2' scorer creates exactly 2 separate goal events", "passed": false, "evidence": "Found 0 R. Gutierrez goal events total across all fixtures"}, {"text": "Output contains both Group Stage (Type: League) and Playoffs (Type: Playoff)", "passed": false, "evidence": "Stage types found: []"}, {"text": "All scorers appear in their team's squad", "passed": true, "evidence": "No missing scorers in squads"}], "summary": {"passed": 1, "failed": 9, "total": 10, "pass_rate": 0.1}}}, {"id": "knockout-bracket-8-teams-with_skill", "prompt": "Create an EasyChamp import JSON for an 8-team knockout tournament called 'Copa Primavera 2026' under 'Liga Juvenil AR' league (Argentina, Soccer). The 8 teams are: Pumas FC, Rayos del Norte, Condores SC, Toros United, Panteras CF, Vikingos FC, Delfines SC, and Leones Azules. Generate the full bracket structure with quarterfinals, semifinals, final, and 3rd place playoff. All matches should have Status 0 (not yet played) with scores '0'-'0'. Use proper binary tree node ordering for the bracket. The import should be ready for POST /import/league.", "eval_id": 2, "outputs": [{"name": "copa-primavera-2026-import.json", "type": "text", "content": "{\n  \"ImportSource\": 99,\n  \"ImportMode\": 0,\n  \"League\": {\n    \"Name\": \"Liga Juvenil AR\",\n    \"Country\": \"Argentina\",\n    \"SportKindName\": \"Soccer\",\n    \"Id\": \"Liga Juvenil AR\",\n    \"Champs\": [\n      {\n        \"Name\": \"Copa Primavera 2026\",\n        \"Id\": \"copa-primavera-2026\",\n        \"ExternalId\": \"copa-primavera-2026\",\n        \"LeagueName\": \"Liga Juvenil AR\",\n        \"StartDate\": \"2026-03-09\",\n        \"EndDate\": \"2026-06-30\",\n        \"IsComplete\": false,\n        \"SportKindName\": \"Soccer\",\n        \"Teams\": [\n          {\n            \"Name\": \"Pumas FC\",\n            \"Id\": \"Pumas FC\",\n            \"SportKindName\": \"Soccer\",\n            \"TeamMembers\": []\n          },\n          {\n            \"Name\": \"Rayos del Norte\",\n            \"Id\": \"Rayos del Norte\",\n            \"SportKindName\": \"Soccer\",\n            \"TeamMembers\": []\n          },\n          {\n            \"Name\": \"Condores SC\",\n            \"Id\": \"Condores SC\",\n            \"SportKindName\": \"Soccer\",\n            \"TeamMembers\": []\n          },\n          {\n            \"Name\": \"Toros United\",\n            \"Id\": \"Toros United\",\n            \"SportKindName\": \"Soccer\",\n            \"TeamMembers\": []\n          },\n          {\n            \"Name\": \"Panteras CF\",\n            \"Id\": \"Panteras CF\",\n            \"SportKindName\": \"Soccer\",\n            \"TeamMembers\": []\n          },\n          {\n            \"Name\": \"Vikingos FC\",\n            \"Id\": \"Vikingos FC\",\n            \"SportKindName\": \"Soccer\",\n            \"TeamMembers\": []\n          },\n          {\n            \"Name\": \"Delfines SC\",\n            \"Id\": \"Delfines SC\",\n            \"SportKindName\": \"Soccer\",\n            \"TeamMembers\": []\n          },\n          {\n            \"Name\": \"Leones Azules\",\n            \"Id\": \"Leones Azules\",\n            \"SportKindName\": \"Soccer\",\n            \"TeamMembers\": []\n          }\n        ],\n        \"Stages\": [\n          {\n            \"Name\": \"Playoffs\",\n            \"Type\": \"Playoff\",\n            \"Order\": 1,\n            \"Groups\": [\n              {\n                \"Name\": \"Playoffs\",\n                \"TeamIds\": [\n                  \"Pumas FC\",\n                  \"Rayos del Norte\",\n                  \"Condores SC\",\n                  \"Toros United\",\n                  \"Panteras CF\",\n                  \"Vikingos FC\",\n                  \"Delfines SC\",\n                  \"Leones Azules\"\n                ],\n                \"Fixtures\": [\n                  {\n                    \"Id\": \"copa-primavera-2026:qf1\",\n                    \"Date\": \"2026-03-09\",\n                    \"HomeTeamScore\": \"0\",\n                    \"AwayTeamScore\": \"0\",\n                    \"MatchDay\": 1,\n                    \"MatchDayName\": \"quarterfinal\",\n                    \"Status\": 0,\n                    \"Order\": 4,\n                    \"HomeTeam\": {\n                      \"Id\": \"Pumas FC\",\n                      \"Name\": \"Pumas FC\",\n                      \"SportKindName\": \"Soccer\"\n                    },\n                    \"AwayTeam\": {\n                      \"Id\": \"Rayos del Norte\",\n                      \"Name\": \"Rayos del Norte\",\n                      \"SportKindName\": \"Soccer\"\n                    },\n                    \"HomeSquad\": [],\n                    \"AwaySquad\": [],\n                    \"Events\": []\n                  },\n                  {\n                    \"Id\": \"copa-primavera-2026:qf2\",\n                    \"Date\": \"2026-03-09\",\n                    \"HomeTeamScore\": \"0\",\n                    \"AwayTeamScore\": \"0\",\n                    \"MatchDay\": 1,\n                    \"MatchDayName\": \"quarterfinal\",\n                    \"Status\": 0,\n                    \"Order\": 5,\n                    \"HomeTeam\": {\n                      \"Id\": \"Condores SC\",\n                      \"Name\": \"Condores SC\",\n                      \"SportKindName\": \"Soccer\"\n                    },\n                    \"AwayTeam\": {\n                      \"Id\": \"Toros United\",\n                      \"Name\": \"Toros United\",\n                      \"SportKindName\": \"Soccer\"\n                    },\n                    \"HomeSquad\": [],\n                    \"AwaySquad\": [],\n                    \"Events\": []\n                  },\n                  {\n                    \"Id\": \"copa-primavera-2026:qf3\",\n                    \"Date\": \"2026-03-09\",\n                    \"HomeTeamScore\": \"0\",\n                    \"AwayTeamScore\": \"0\",\n                    \"MatchDay\": 1,\n                    \"MatchDayName\": \"quarterfinal\",\n                    \"Status\": 0,\n                    \"Order\": 6,\n                    \"HomeTeam\": {\n                      \"Id\": \"Panteras CF\",\n                      \"Name\": \"Panteras CF\",\n                      \"SportKindName\": \"Soccer\"\n                    },\n                    \"AwayTeam\": {\n                      \"Id\": \"Vikingos FC\",\n                      \"Name\": \"Vikingos FC\",\n                      \"SportKindName\": \"Soccer\"\n                    },\n                    \"HomeSquad\": [],\n                    \"AwaySquad\": [],\n                    \"Events\": []\n                  },\n                  {\n                    \"Id\": \"copa-primavera-2026:qf4\",\n                    \"Date\": \"2026-03-09\",\n                    \"HomeTeamScore\": \"0\",\n                    \"AwayTeamScore\": \"0\",\n                    \"MatchDay\": 1,\n                    \"MatchDayName\": \"quarterfinal\",\n                    \"Status\": 0,\n                    \"Order\": 7,\n                    \"HomeTeam\": {\n                      \"Id\": \"Delfines SC\",\n                      \"Name\": \"Delfines SC\",\n                      \"SportKindName\": \"Soccer\"\n                    },\n                    \"AwayTeam\": {\n                      \"Id\": \"Leones Azules\",\n                      \"Name\": \"Leones Azules\",\n                      \"SportKindName\": \"Soccer\"\n                    },\n                    \"HomeSquad\": [],\n                    \"AwaySquad\": [],\n                    \"Events\": []\n                  },\n                  {\n                    \"Id\": \"copa-primavera-2026:sf1\",\n                    \"Date\": \"2026-03-09\",\n                    \"HomeTeamScore\": \"0\",\n                    \"AwayTeamScore\": \"0\",\n                    \"MatchDay\": 2,\n                    \"MatchDayName\": \"semifinal\",\n                    \"Status\": 0,\n                    \"Order\": 2,\n                    \"HomeTeam\": {\n                      \"Id\": \"Pumas FC\",\n                      \"Name\": \"Pumas FC\",\n                      \"SportKindName\": \"Soccer\"\n                    },\n                    \"AwayTeam\": {\n                      \"Id\": \"Condores SC\",\n                      \"Name\": \"Condores SC\",\n                      \"SportKindName\": \"Soccer\"\n                    },\n                    \"HomeSquad\": [],\n                    \"AwaySquad\": [],\n                    \"Events\": []\n                  },\n                  {\n                    \"Id\": \"copa-primavera-2026:sf2\",\n                    \"Date\": \"2026-03-09\",\n                    \"HomeTeamScore\": \"0\",\n                    \"AwayTeamScore\": \"0\",\n                    \"MatchDay\": 2,\n                    \"MatchDayName\": \"semifinal\",\n                    \"Status\": 0,\n                    \"Order\": 3,\n                    \"HomeTeam\": {\n                      \"Id\": \"Panteras CF\",\n                      \"Name\": \"Panteras CF\",\n                      \"SportKindName\": \"Soccer\"\n                    },\n                    \"AwayTeam\": {\n                      \"Id\": \"Delfines SC\",\n                      \"Name\": \"Delfines SC\",\n                      \"SportKindName\": \"Soccer\"\n                    },\n                    \"HomeSquad\": [],\n                    \"AwaySquad\": [],\n                    \"Events\": []\n                  },\n                  {\n                    \"Id\": \"copa-primavera-2026:3rd-place\",\n                    \"Date\": \"2026-03-09\",\n                    \"HomeTeamScore\": \"0\",\n                    \"AwayTeamScore\": \"0\",\n                    \"MatchDay\": 3,\n                    \"MatchDayName\": \"3rd_place_playoff\",\n                    \"Status\": 0,\n                    \"Order\": null,\n                    \"HomeTeam\": {\n                      \"Id\": \"Condores SC\",\n                      \"Name\": \"Condores SC\",\n                      \"SportKindName\": \"Soccer\"\n                    },\n                    \"AwayTeam\": {\n                      \"Id\": \"Delfines SC\",\n                      \"Name\": \"Delfines SC\",\n                      \"SportKindName\": \"Soccer\"\n                    },\n                    \"HomeSquad\": [],\n                    \"AwaySquad\": [],\n                    \"Events\": []\n                  },\n                  {\n                    \"Id\": \"copa-primavera-2026:final\",\n                    \"Date\": \"2026-03-09\",\n                    \"HomeTeamScore\": \"0\",\n                    \"AwayTeamScore\": \"0\",\n                    \"MatchDay\": 3,\n                    \"MatchDayName\": \"final\",\n                    \"Status\": 0,\n                    \"Order\": 1,\n                    \"HomeTeam\": {\n                      \"Id\": \"Pumas FC\",\n                      \"Name\": \"Pumas FC\",\n                      \"SportKindName\": \"Soccer\"\n                    },\n                    \"AwayTeam\": {\n                      \"Id\": \"Panteras CF\",\n                      \"Name\": \"Panteras CF\",\n                      \"SportKindName\": \"Soccer\"\n                    },\n                    \"HomeSquad\": [],\n                    \"AwaySquad\": [],\n                    \"Events\": []\n                  }\n                ]\n              }\n            ]\n          }\n        ]\n      }\n    ]\n  }\n}"}], "grading": {"expectations": [{"text": "Quarterfinal fixtures have Order values from 4-7", "passed": true, "evidence": "QF Order values: [4, 5, 6, 7]"}, {"text": "Semifinal fixtures have Order values 2 and 3", "passed": true, "evidence": "SF Order values: [2, 3]"}, {"text": "Final fixture has Order value 1", "passed": true, "evidence": "Final Order values: [1]"}, {"text": "All matchDayName values are lowercase without hyphens", "passed": true, "evidence": "matchDayName values: {'3rd_place_playoff', 'final', 'quarterfinal', 'semifinal'}"}, {"text": "A 3rd place playoff fixture exists", "passed": true, "evidence": "Found 1 3rd place playoff fixture(s)"}, {"text": "Champs array is nested inside League object", "passed": true, "evidence": "Champs in League: True, Champs at root: False"}, {"text": "All scores are strings ('0' not 0)", "passed": true, "evidence": "Score types: {'str'}"}, {"text": "Exactly 8 total playoff fixtures (4+2+1+1)", "passed": true, "evidence": "QF: 4, SF: 2, Final: 1, 3rd: 1 = 8 total"}, {"text": "HomeTeam and AwayTeam are objects with Id and Name", "passed": true, "evidence": "Checked 8 fixtures"}], "summary": {"passed": 9, "failed": 0, "total": 9, "pass_rate": 1.0}}}, {"id": "knockout-bracket-8-teams-without_skill", "prompt": "Create an EasyChamp import JSON for an 8-team knockout tournament called 'Copa Primavera 2026' under 'Liga Juvenil AR' league (Argentina, Soccer). The 8 teams are: Pumas FC, Rayos del Norte, Condores SC, Toros United, Panteras CF, Vikingos FC, Delfines SC, and Leones Azules. Generate the full bracket structure with quarterfinals, semifinals, final, and 3rd place playoff. All matches should have Status 0 (not yet played) with scores '0'-'0'. Use proper binary tree node ordering for the bracket. The import should be ready for POST /import/league.", "eval_id": 2, "outputs": [{"name": "copa-primavera-2026-import.json", "type": "text", "content": "{\n  \"League\": {\n    \"Name\": \"Liga Juvenil AR\",\n    \"Country\": \"Argentina\",\n    \"Sport\": \"Soccer\"\n  },\n  \"Season\": {\n    \"Name\": \"Copa Primavera 2026\",\n    \"Type\": 2\n  },\n  \"Teams\": [\n    { \"Name\": \"Pumas FC\" },\n    { \"Name\": \"Rayos del Norte\" },\n    { \"Name\": \"Condores SC\" },\n    { \"Name\": \"Toros United\" },\n    { \"Name\": \"Panteras CF\" },\n    { \"Name\": \"Vikingos FC\" },\n    { \"Name\": \"Delfines SC\" },\n    { \"Name\": \"Leones Azules\" }\n  ],\n  \"Rounds\": [\n    {\n      \"Name\": \"Quarter-finals\",\n      \"Order\": 1,\n      \"Matches\": [\n        {\n          \"Node\": 1,\n          \"HomeTeam\": \"Pumas FC\",\n          \"AwayTeam\": \"Rayos del Norte\",\n          \"HomeScore\": \"0\",\n          \"AwayScore\": \"0\",\n          \"Status\": 0\n        },\n        {\n          \"Node\": 2,\n          \"HomeTeam\": \"Condores SC\",\n          \"AwayTeam\": \"Toros United\",\n          \"HomeScore\": \"0\",\n          \"AwayScore\": \"0\",\n          \"Status\": 0\n        },\n        {\n          \"Node\": 3,\n          \"HomeTeam\": \"Panteras CF\",\n          \"AwayTeam\": \"Vikingos FC\",\n          \"HomeScore\": \"0\",\n          \"AwayScore\": \"0\",\n          \"Status\": 0\n        },\n        {\n          \"Node\": 4,\n          \"HomeTeam\": \"Delfines SC\",\n          \"AwayTeam\": \"Leones Azules\",\n          \"HomeScore\": \"0\",\n          \"AwayScore\": \"0\",\n          \"Status\": 0\n        }\n      ]\n    },\n    {\n      \"Name\": \"Semi-finals\",\n      \"Order\": 2,\n      \"Matches\": [\n        {\n          \"Node\": 5,\n          \"HomeTeam\": null,\n          \"AwayTeam\": null,\n          \"HomeScore\": \"0\",\n          \"AwayScore\": \"0\",\n          \"Status\": 0\n        },\n        {\n          \"Node\": 6,\n          \"HomeTeam\": null,\n          \"AwayTeam\": null,\n          \"HomeScore\": \"0\",\n          \"AwayScore\": \"0\",\n          \"Status\": 0\n        }\n      ]\n    },\n    {\n      \"Name\": \"3rd Place\",\n      \"Order\": 3,\n      \"Matches\": [\n        {\n          \"Node\": 7,\n          \"HomeTeam\": null,\n          \"AwayTeam\": null,\n          \"HomeScore\": \"0\",\n          \"AwayScore\": \"0\",\n          \"Status\": 0\n        }\n      ]\n    },\n    {\n      \"Name\": \"Final\",\n      \"Order\": 4,\n      \"Matches\": [\n        {\n          \"Node\": 8,\n          \"HomeTeam\": null,\n          \"AwayTeam\": null,\n          \"HomeScore\": \"0\",\n          \"AwayScore\": \"0\",\n          \"Status\": 0\n        }\n      ]\n    }\n  ]\n}\n"}], "grading": {"expectations": [{"text": "Quarterfinal fixtures have Order values from 4-7", "passed": false, "evidence": "QF Order values: []"}, {"text": "Semifinal fixtures have Order values 2 and 3", "passed": false, "evidence": "SF Order values: []"}, {"text": "Final fixture has Order value 1", "passed": false, "evidence": "Final Order values: []"}, {"text": "All matchDayName values are lowercase without hyphens", "passed": false, "evidence": "matchDayName values: set()"}, {"text": "A 3rd place playoff fixture exists", "passed": false, "evidence": "Found 0 3rd place playoff fixture(s)"}, {"text": "Champs array is nested inside League object", "passed": false, "evidence": "Champs in League: False, Champs at root: False"}, {"text": "All scores are strings ('0' not 0)", "passed": false, "evidence": "No scores found"}, {"text": "Exactly 8 total playoff fixtures (4+2+1+1)", "passed": false, "evidence": "QF: 0, SF: 0, Final: 0, 3rd: 0 = 0 total"}, {"text": "HomeTeam and AwayTeam are objects with Id and Name", "passed": false, "evidence": "Checked 0 fixtures"}], "summary": {"passed": 0, "failed": 9, "total": 9, "pass_rate": 0.0}}}, {"id": "diagnose-fix-broken-import-with_skill", "prompt": "I have an import JSON file at evals/files/broken-import.json that I tried to use with EasyChamp's POST /import/league API, but things went wrong: scores aren't displaying properly, the bracket visualization is broken, and goal events aren't showing up. Please diagnose all the issues in this file and produce a corrected version. Save the fixed file as fixed-import.json.", "eval_id": 3, "outputs": [{"name": "diagnosis.md", "type": "text", "content": "# Diagnosis: broken-import.json\n\n## Issues Found: 11\n\n### Issue 1: Champs array at root level instead of inside League (CRITICAL - silent failure)\n\n**Location**: Root-level `Champs` array\n**Problem**: The `Champs` array is placed at the JSON root alongside `League`, but the API deserializer expects `Champs` nested inside the `League` object. This causes the API to return 200 OK but import 0 champs (silent failure).\n**Reference**: Common Pitfall #23\n**Fix**: Moved `Champs` array inside the `League` object.\n\n### Issue 2: Score fields are integers instead of strings (CRITICAL - causes HTTP 500)\n\n**Location**: All fixtures - `HomeTeamScore`, `AwayTeamScore`\n**Problem**: Scores are integers (e.g., `2`, `1`, `3`) but MongoDB requires strings. Integer scores cause serialization errors and HTTP 500 responses.\n**Reference**: Common Pitfall #1, Data Types table\n**Fix**: Changed all score values to strings: `\"2\"`, `\"1\"`, `\"3\"`, `\"0\"`.\n\n### Issue 3: EventType is \"goal\" instead of \"scorer\" (events won't display)\n\n**Location**: `fixture-1` Events array, both events\n**Problem**: `\"EventType\": \"goal\"` is not recognized by EasyChamp. The system uses `\"scorer\"` internally.\n**Reference**: Common Pitfall #4\n**Fix**: Changed `\"goal\"` to `\"scorer\"` on both events.\n\n### Issue 4: MatchDayName format wrong for playoff fixtures (bracket won't render)\n\n**Location**: `fixture-qf1` has `\"Quarter-Final\"`, `fixture-sf1` has `\"Semi-Final\"`\n**Problem**: Playoff MatchDayName values must be lowercase with no hyphens, matching the PlayoffStage enum exactly. Invalid values cause fixtures to be skipped during bracket tree generation.\n**Reference**: Common Pitfall #3, Knockout Bracket `PLAYOFF_STAGES_ORDER` mapping\n**Fix**: Changed to `\"quarterfinal\"` and `\"semifinal\"`.\n\n### Issue 5: Missing Order field on playoff fixtures (bracket won't render)\n\n**Location**: Both playoff fixtures (`fixture-qf1`, `fixture-sf1`)\n**Problem**: The `fillTree` algorithm's first pass matches `fixture.order == node.nodeId`. Without Order values, fixtures fall through to sequential fill which produces incorrect placement or empty brackets.\n**Reference**: Knockout Bracket documentation, binary tree node mapping\n**Fix**: Added `\"Order\": 4` to QF fixture (quarterfinal node 4) and `\"Order\": 2` to SF fixture (semifinal node 2).\n\n### Issue 6: Penalty scores are integers instead of strings (causes HTTP 500)\n\n**Location**: `fixture-qf1` - `HomePenaltyScore: 5`, `AwayPenaltyScore: 4`\n**Problem**: Same as regular scores - penalty scores must be strings in MongoDB.\n**Reference**: Common Pitfall #2\n**Fix**: Changed to `\"5\"` and `\"4\"`.\n\n### Issue 7: PeriodScores Type is \"Penalties\" (capital P) instead of \"penalties\"\n\n**Location**: `fixture-qf1` PeriodScores array\n**Problem**: The frontend reads penalties from `periodScores.find(x => x.type === \"penalties\")`. Capital \"Penalties\" won't match.\n**Reference**: Common Pitfall #12\n**Fix**: Changed `\"Type\": \"Penalties\"` to `\"Type\": \"penalties\"`.\n\n### Issue 8: PeriodScores missing regular_period entry and scores are integers\n\n**Location**: `fixture-qf1` PeriodScores array\n**Problem**: Two sub-issues: (a) Only has a penalties entry, missing the `regular_period` entry showing the regulation-time score. (b) `HomeScore`/`AwayScore` values are integers (`5`, `4`) instead of strings. The regular_period entry is needed for proper penalty display formatting (\"X-X (pen Y-Z)\").\n**Reference**: Common Pitfall #19, Data Types table\n**Fix**: Added `regular_period` entry with `\"HomeScore\": \"2\", \"AwayScore\": \"2\"` (the regulation-time score). Changed penalties entry scores to strings. Added `Number` fields (1 for regular_period, 2 for penalties).\n\n### Issue 9: Missing OtherFullName on all Player objects\n\n**Location**: Every Player object throughout the file\n**Problem**: The API requires `OtherFullName` to be present on Player objects. It can be an empty string but must not be omitted. Missing field causes import errors.\n**Reference**: Common Pitfall #13\n**Fix**: Added `\"OtherFullName\": \"\"` to all Player objects.\n\n### Issue 10: Missing WinnerTeamId on penalty shootout fixture\n\n**Location**: `fixture-qf1`\n**Problem**: Penalty fixtures require `WinnerTeamId` to identify the shootout winner. Without it, the winner highlight won't display correctly.\n**Reference**: Common Pitfall #2\n**Fix**: Added `\"WinnerTeamId\": \"team-atlas\"` (home team won 5-4 on penalties).\n\n### Issue 11: Missing SportKindName on semifinal team objects\n\n**Location**: `fixture-sf1` HomeTeam and AwayTeam\n**Problem**: The HomeTeam and AwayTeam objects in the semifinal fixture are missing `SportKindName`. All team references should include this field for proper entity matching.\n**Reference**: League import template, Common Pitfall #23\n**Fix**: Added `\"SportKindName\": \"Soccer\"` to both team objects. Also added `ImageUrl: null` for consistency.\n\n---\n\n## Summary of Changes\n\n| Category | Issues | Impact |\n|----------|--------|--------|\n| JSON structure | Champs placement (#1) | 0 champs imported (silent failure) |\n| Data types | Scores as integers (#2, #6, #8) | HTTP 500 errors |\n| Event naming | EventType \"goal\" (#3) | Events invisible |\n| Bracket rendering | MatchDayName format (#4), missing Order (#5) | Broken bracket visualization |\n| Penalty display | PeriodScores Type case (#7), missing regular_period (#8) | Penalty scores not displayed |\n| Player data | Missing OtherFullName (#9) | Import errors |\n| Penalty metadata | Missing WinnerTeamId (#10) | No winner highlight |\n| Team completeness | Missing SportKindName (#11) | Team matching issues |\n"}, {"name": "fixed-import.json", "type": "text", "content": "{\n  \"ImportSource\": 99,\n  \"ImportMode\": 0,\n  \"League\": {\n    \"Name\": \"Copa Regional\",\n    \"Country\": \"Argentina\",\n    \"SportKindName\": \"Soccer\",\n    \"ImageUrl\": null,\n    \"Champs\": [\n      {\n        \"Name\": \"Copa Regional 2026\",\n        \"ExternalId\": \"copa-regional-2026\",\n        \"StartDate\": \"2026-03-01\",\n        \"EndDate\": \"2026-05-30\",\n        \"IsComplete\": false,\n        \"SportKindName\": \"Soccer\",\n        \"LeagueName\": \"Copa Regional\",\n        \"Teams\": [\n          {\n            \"Id\": \"team-atlas\",\n            \"Name\": \"Club Atlas\",\n            \"ImageUrl\": null,\n            \"SportKindName\": \"Soccer\",\n            \"TeamMembers\": [\n              {\n                \"Player\": {\n                  \"FullName\": \"Carlos Medina\",\n                  \"Id\": \"player-medina\",\n                  \"OtherFullName\": \"\",\n                  \"SportKindName\": \"Soccer\"\n                }\n              },\n              {\n                \"Player\": {\n                  \"FullName\": \"Diego Suarez\",\n                  \"Id\": \"player-suarez\",\n                  \"OtherFullName\": \"\",\n                  \"SportKindName\": \"Soccer\"\n                }\n              }\n            ]\n          },\n          {\n            \"Id\": \"team-river\",\n            \"Name\": \"River Plate Jr\",\n            \"ImageUrl\": null,\n            \"SportKindName\": \"Soccer\",\n            \"TeamMembers\": []\n          },\n          {\n            \"Id\": \"team-boca\",\n            \"Name\": \"Boca Juniors Jr\",\n            \"ImageUrl\": null,\n            \"SportKindName\": \"Soccer\",\n            \"TeamMembers\": []\n          }\n        ],\n        \"Stages\": [\n          {\n            \"Name\": \"Group Stage\",\n            \"Type\": \"League\",\n            \"Groups\": [\n              {\n                \"Name\": \"Group A\",\n                \"Fixtures\": [\n                  {\n                    \"Id\": \"fixture-1\",\n                    \"Date\": \"2026-03-01\",\n                    \"HomeTeamScore\": \"2\",\n                    \"AwayTeamScore\": \"1\",\n                    \"MatchDay\": 1,\n                    \"MatchDayName\": \"1\",\n                    \"Status\": 2,\n                    \"HomeTeam\": {\n                      \"Id\": \"team-atlas\",\n                      \"Name\": \"Club Atlas\",\n                      \"ImageUrl\": null,\n                      \"SportKindName\": \"Soccer\",\n                      \"TeamMembers\": [\n                        {\n                          \"Player\": {\n                            \"FullName\": \"Carlos Medina\",\n                            \"Id\": \"player-medina\",\n                            \"OtherFullName\": \"\",\n                            \"SportKindName\": \"Soccer\"\n                          }\n                        },\n                        {\n                          \"Player\": {\n                            \"FullName\": \"Diego Suarez\",\n                            \"Id\": \"player-suarez\",\n                            \"OtherFullName\": \"\",\n                            \"SportKindName\": \"Soccer\"\n                          }\n                        }\n                      ]\n                    },\n                    \"AwayTeam\": {\n                      \"Id\": \"team-river\",\n                      \"Name\": \"River Plate Jr\",\n                      \"ImageUrl\": null,\n                      \"SportKindName\": \"Soccer\",\n                      \"TeamMembers\": []\n                    },\n                    \"HomeSquad\": [\n                      {\n                        \"Player\": {\n                          \"FullName\": \"Carlos Medina\",\n                          \"Id\": \"player-medina\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"SquadType\": 0,\n                        \"IsPlayed\": true\n                      }\n                    ],\n                    \"AwaySquad\": [],\n                    \"Events\": [\n                      {\n                        \"IsHomeEvent\": true,\n                        \"Minute\": \"15\",\n                        \"EventType\": \"scorer\",\n                        \"Player\": {\n                          \"FullName\": \"Carlos Medina\",\n                          \"Id\": \"player-medina\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"Description\": \"Goal by Medina\"\n                      },\n                      {\n                        \"IsHomeEvent\": true,\n                        \"Minute\": \"67\",\n                        \"EventType\": \"scorer\",\n                        \"Player\": {\n                          \"FullName\": \"Diego Suarez\",\n                          \"Id\": \"player-suarez\",\n                          \"OtherFullName\": \"\",\n                          \"SportKindName\": \"Soccer\"\n                        },\n                        \"Description\": \"Goal by Suarez\"\n                      }\n                    ]\n                  }\n                ]\n              }\n            ]\n          },\n          {\n            \"Name\": \"Playoffs\",\n            \"Type\": \"Playoff\",\n            \"Groups\": [\n              {\n                \"Name\": \"Playoffs\",\n                \"Fixtures\": [\n                  {\n                    \"Id\": \"fixture-qf1\",\n                    \"Date\": \"2026-05-01\",\n                    \"HomeTeamScore\": \"2\",\n                    \"AwayTeamScore\": \"2\",\n                    \"MatchDay\": 1,\n                    \"MatchDayName\": \"quarterfinal\",\n                    \"Status\": 2,\n                    \"Order\": 4,\n                    \"HomeTeam\": {\n                      \"Id\": \"team-atlas\",\n                      \"Name\": \"Club Atlas\",\n                      \"ImageUrl\": null,\n                      \"SportKindName\": \"Soccer\"\n                    },\n                    \"AwayTeam\": {\n                      \"Id\": \"team-river\",\n                      \"Name\": \"River Plate Jr\",\n                      \"ImageUrl\": null,\n                      \"SportKindName\": \"Soccer\"\n                    },\n                    \"HomeSquad\": [],\n                    \"AwaySquad\": [],\n                    \"Events\": [],\n                    \"HomePenaltyScore\": \"5\",\n                    \"AwayPenaltyScore\": \"4\",\n                    \"HasPenalties\": true,\n                    \"WinnerTeamId\": \"team-atlas\",\n                    \"PeriodScores\": [\n                      {\n                        \"HomeScore\": \"2\",\n                        \"AwayScore\": \"2\",\n                        \"Type\": \"regular_period\",\n                        \"Number\": 1\n                      },\n                      {\n                        \"HomeScore\": \"5\",\n                        \"AwayScore\": \"4\",\n                        \"Type\": \"penalties\",\n                        \"Number\": 2\n                      }\n                    ]\n                  },\n                  {\n                    \"Id\": \"fixture-sf1\",\n                    \"Date\": \"2026-05-15\",\n                    \"HomeTeamScore\": \"3\",\n                    \"AwayTeamScore\": \"0\",\n                    \"MatchDay\": 1,\n                    \"MatchDayName\": \"semifinal\",\n                    \"Status\": 2,\n                    \"Order\": 2,\n                    \"HomeTeam\": {\n                      \"Id\": \"team-atlas\",\n                      \"Name\": \"Club Atlas\",\n                      \"ImageUrl\": null,\n                      \"SportKindName\": \"Soccer\"\n                    },\n                    \"AwayTeam\": {\n                      \"Id\": \"team-boca\",\n                      \"Name\": \"Boca Juniors Jr\",\n                      \"ImageUrl\": null,\n                      \"SportKindName\": \"Soccer\"\n                    },\n                    \"HomeSquad\": [],\n                    \"AwaySquad\": [],\n                    \"Events\": []\n                  }\n                ]\n              }\n            ]\n          }\n        ]\n      }\n    ]\n  }\n}\n"}], "grading": {"expectations": [{"text": "Identifies that scores are numbers and must be strings", "passed": true, "evidence": "Diagnosis mentions score type issue"}, {"text": "Identifies 'Quarter-Final' must be 'quarterfinal'", "passed": true, "evidence": "Quarter-Final format issue mentioned"}, {"text": "Identifies 'Semi-Final' must be 'semifinal'", "passed": true, "evidence": "Semi-Final format issue mentioned"}, {"text": "Identifies PeriodScores must use Home_score/Away_score", "passed": false, "evidence": "Not mentioned"}, {"text": "Identifies PeriodScores Type must be lowercase 'penalties'", "passed": true, "evidence": "PeriodScores Type casing mentioned"}, {"text": "Identifies EventType 'goal' must be 'scorer'", "passed": true, "evidence": "EventType issue mentioned"}, {"text": "Identifies Champs at root must be inside League", "passed": true, "evidence": "Champs location issue mentioned"}, {"text": "Identifies missing OtherFullName on Players", "passed": true, "evidence": "OtherFullName issue mentioned"}, {"text": "Identifies penalty scores must be strings", "passed": true, "evidence": "Penalty score type mentioned"}, {"text": "The fixed output file has all issues corrected", "passed": true, "evidence": "scores_strings=True, mdns_valid=True, champs_in_league=True, events_scorer=True"}], "summary": {"passed": 9, "failed": 1, "total": 10, "pass_rate": 0.9}}}, {"id": "diagnose-fix-broken-import-without_skill", "prompt": "I have an import JSON file at evals/files/broken-import.json that I tried to use with EasyChamp's POST /import/league API, but things went wrong: scores aren't displaying properly, the bracket visualization is broken, and goal events aren't showing up. Please diagnose all the issues in this file and produce a corrected version. Save the fixed file as fixed-import.json.", "eval_id": 3, "outputs": [{"name": "diagnosis.md", "type": "text", "content": "# Diagnosis of broken-import.json\n\n## Issues Found and Fixed\n\n### 1. Stage Type uses string values instead of numeric enums\n- **Location**: `Stages[0].Type` and `Stages[1].Type`\n- **Broken**: `\"Type\": \"League\"` and `\"Type\": \"Playoff\"`\n- **Fixed**: `\"Type\": 0` (League/Group stage) and `\"Type\": 1` (Playoff/Knockout stage)\n- **Impact**: The system cannot determine stage rendering mode. League stages render as tables; Playoff stages render as brackets. String values are not recognized, so neither mode works correctly. This directly causes the broken bracket visualization.\n\n### 2. EventType uses string values instead of numeric enums\n- **Location**: `Events[].EventType` in fixture-1\n- **Broken**: `\"EventType\": \"goal\"`\n- **Fixed**: `\"EventType\": 0` (Goal = 0 in the event type enum)\n- **Impact**: Goal events are not recognized by the system because it expects numeric enum values. This is why goal events are not showing up in the match details.\n\n### 3. Minute field is a string instead of an integer\n- **Location**: `Events[].Minute` in fixture-1\n- **Broken**: `\"Minute\": \"15\"` and `\"Minute\": \"67\"`\n- **Fixed**: `\"Minute\": 15` and `\"Minute\": 67`\n- **Impact**: Event timeline rendering may fail or sort incorrectly when the minute value is a string instead of a number. This contributes to goal events not displaying properly.\n\n### 4. Playoff fixtures have duplicate MatchDay values (broken bracket)\n- **Location**: `Stages[1].Groups[0].Fixtures` (the Playoff stage)\n- **Broken**: Both Quarter-Final (`fixture-qf1`) and Semi-Final (`fixture-sf1`) have `\"MatchDay\": 1`\n- **Fixed**: Quarter-Final keeps `\"MatchDay\": 1`, Semi-Final changed to `\"MatchDay\": 2`\n- **Impact**: Bracket visualization relies on MatchDay to determine which round a fixture belongs to. When both rounds share the same MatchDay, the bracket renderer cannot distinguish rounds, causing all matches to collapse into a single column. This is a primary cause of the broken bracket.\n\n### 5. PeriodScores Type uses string instead of numeric enum\n- **Location**: `PeriodScores[0].Type` in fixture-qf1\n- **Broken**: `\"Type\": \"Penalties\"`\n- **Fixed**: `\"Type\": 4` (Penalties period type enum)\n- **Impact**: The system cannot identify the period type, so penalty shootout scores may not render correctly. This contributes to scores not displaying properly for matches that went to penalties.\n\n### 6. Semi-Final teams missing required fields (SportKindName, ImageUrl)\n- **Location**: `Stages[1].Groups[0].Fixtures[1]` (fixture-sf1) HomeTeam and AwayTeam\n- **Broken**: HomeTeam and AwayTeam objects only contain `Id` and `Name`\n- **Fixed**: Added `\"ImageUrl\": null` and `\"SportKindName\": \"Soccer\"` to both teams\n- **Impact**: Missing required team fields can cause rendering errors or data validation failures when the system tries to display team information in the bracket or match details.\n\n## Summary\n\nThe root causes map to the three reported symptoms:\n\n| Symptom | Root Causes |\n|---|---|\n| Scores not displaying properly | PeriodScores Type as string (#5) |\n| Bracket visualization broken | Stage Type as string (#1), duplicate MatchDay in playoff rounds (#4) |\n| Goal events not showing up | EventType as string (#2), Minute as string (#3) |\n"}, {"name": "fixed-import.json", "type": "text", "content": "{\n  \"ImportSource\": 99,\n  \"ImportMode\": 0,\n  \"League\": {\n    \"Name\": \"Copa Regional\",\n    \"Country\": \"Argentina\",\n    \"SportKindName\": \"Soccer\",\n    \"ImageUrl\": null\n  },\n  \"Champs\": [\n    {\n      \"Name\": \"Copa Regional 2026\",\n      \"ExternalId\": \"copa-regional-2026\",\n      \"StartDate\": \"2026-03-01\",\n      \"EndDate\": \"2026-05-30\",\n      \"IsComplete\": false,\n      \"SportKindName\": \"Soccer\",\n      \"LeagueName\": \"Copa Regional\",\n      \"Stages\": [\n        {\n          \"Name\": \"Group Stage\",\n          \"Type\": 0,\n          \"Groups\": [\n            {\n              \"Name\": \"Group A\",\n              \"Fixtures\": [\n                {\n                  \"Id\": \"fixture-1\",\n                  \"Date\": \"2026-03-01\",\n                  \"HomeTeamScore\": 2,\n                  \"AwayTeamScore\": 1,\n                  \"MatchDay\": 1,\n                  \"MatchDayName\": \"1\",\n                  \"Status\": 2,\n                  \"HomeTeam\": {\n                    \"Id\": \"team-atlas\",\n                    \"Name\": \"Club Atlas\",\n                    \"ImageUrl\": null,\n                    \"SportKindName\": \"Soccer\",\n                    \"TeamMembers\": [\n                      {\n                        \"Player\": {\n                          \"FullName\": \"Carlos Medina\",\n                          \"Id\": \"player-medina\",\n                          \"SportKindName\": \"Soccer\"\n                        }\n                      },\n                      {\n                        \"Player\": {\n                          \"FullName\": \"Diego Suarez\",\n                          \"Id\": \"player-suarez\",\n                          \"SportKindName\": \"Soccer\"\n                        }\n                      }\n                    ]\n                  },\n                  \"AwayTeam\": {\n                    \"Id\": \"team-river\",\n                    \"Name\": \"River Plate Jr\",\n                    \"ImageUrl\": null,\n                    \"SportKindName\": \"Soccer\",\n                    \"TeamMembers\": []\n                  },\n                  \"HomeSquad\": [\n                    {\n                      \"Player\": {\n                        \"FullName\": \"Carlos Medina\",\n                        \"Id\": \"player-medina\",\n                        \"SportKindName\": \"Soccer\"\n                      },\n                      \"SquadType\": 0,\n                      \"IsPlayed\": true\n                    }\n                  ],\n                  \"AwaySquad\": [],\n                  \"Events\": [\n                    {\n                      \"IsHomeEvent\": true,\n                      \"Minute\": 15,\n                      \"EventType\": 0,\n                      \"Player\": {\n                        \"FullName\": \"Carlos Medina\",\n                        \"Id\": \"player-medina\",\n                        \"SportKindName\": \"Soccer\"\n                      },\n                      \"Description\": \"Goal by Medina\"\n                    },\n                    {\n                      \"IsHomeEvent\": true,\n                      \"Minute\": 67,\n                      \"EventType\": 0,\n                      \"Player\": {\n                        \"FullName\": \"Diego Suarez\",\n                        \"Id\": \"player-suarez\",\n                        \"SportKindName\": \"Soccer\"\n                      },\n                      \"Description\": \"Goal by Suarez\"\n                    }\n                  ]\n                }\n              ]\n            }\n          ]\n        },\n        {\n          \"Name\": \"Playoffs\",\n          \"Type\": 1,\n          \"Groups\": [\n            {\n              \"Name\": \"Playoffs\",\n              \"Fixtures\": [\n                {\n                  \"Id\": \"fixture-qf1\",\n                  \"Date\": \"2026-05-01\",\n                  \"HomeTeamScore\": 2,\n                  \"AwayTeamScore\": 2,\n                  \"MatchDay\": 1,\n                  \"MatchDayName\": \"Quarter-Final\",\n                  \"Status\": 2,\n                  \"HomeTeam\": {\n                    \"Id\": \"team-atlas\",\n                    \"Name\": \"Club Atlas\",\n                    \"ImageUrl\": null,\n                    \"SportKindName\": \"Soccer\"\n                  },\n                  \"AwayTeam\": {\n                    \"Id\": \"team-river\",\n                    \"Name\": \"River Plate Jr\",\n                    \"ImageUrl\": null,\n                    \"SportKindName\": \"Soccer\"\n                  },\n                  \"HomeSquad\": [],\n                  \"AwaySquad\": [],\n                  \"Events\": [],\n                  \"HomePenaltyScore\": 5,\n                  \"AwayPenaltyScore\": 4,\n                  \"HasPenalties\": true,\n                  \"PeriodScores\": [\n                    {\n                      \"HomeScore\": 5,\n                      \"AwayScore\": 4,\n                      \"Type\": 4\n                    }\n                  ]\n                },\n                {\n                  \"Id\": \"fixture-sf1\",\n                  \"Date\": \"2026-05-15\",\n                  \"HomeTeamScore\": 3,\n                  \"AwayTeamScore\": 0,\n                  \"MatchDay\": 2,\n                  \"MatchDayName\": \"Semi-Final\",\n                  \"Status\": 2,\n                  \"HomeTeam\": {\n                    \"Id\": \"team-atlas\",\n                    \"Name\": \"Club Atlas\",\n                    \"ImageUrl\": null,\n                    \"SportKindName\": \"Soccer\"\n                  },\n                  \"AwayTeam\": {\n                    \"Id\": \"team-boca\",\n                    \"Name\": \"Boca Juniors Jr\",\n                    \"ImageUrl\": null,\n                    \"SportKindName\": \"Soccer\"\n                  },\n                  \"HomeSquad\": [],\n                  \"AwaySquad\": [],\n                  \"Events\": []\n                }\n              ]\n            }\n          ]\n        }\n      ]\n    }\n  ]\n}"}], "grading": {"expectations": [{"text": "Identifies that scores are numbers and must be strings", "passed": true, "evidence": "Diagnosis mentions score type issue"}, {"text": "Identifies 'Quarter-Final' must be 'quarterfinal'", "passed": false, "evidence": "Quarter-Final format issue mentioned"}, {"text": "Identifies 'Semi-Final' must be 'semifinal'", "passed": false, "evidence": "Semi-Final format issue mentioned"}, {"text": "Identifies PeriodScores must use Home_score/Away_score", "passed": false, "evidence": "Not mentioned"}, {"text": "Identifies PeriodScores Type must be lowercase 'penalties'", "passed": true, "evidence": "PeriodScores Type casing mentioned"}, {"text": "Identifies EventType 'goal' must be 'scorer'", "passed": false, "evidence": "Not mentioned"}, {"text": "Identifies Champs at root must be inside League", "passed": false, "evidence": "Not mentioned"}, {"text": "Identifies missing OtherFullName on Players", "passed": false, "evidence": "Not mentioned"}, {"text": "Identifies penalty scores must be strings", "passed": true, "evidence": "Penalty score type mentioned"}, {"text": "The fixed output file has all issues corrected", "passed": false, "evidence": "scores_strings=False, mdns_valid=False, champs_in_league=False, events_scorer=False"}], "summary": {"passed": 3, "failed": 7, "total": 10, "pass_rate": 0.3}}}], "previous_feedback": {}, "previous_outputs": {}, "benchmark": {"metadata": {"skill_name": "tournament-import", "skill_path": "/Users/antonabyzov/Projects/easychamp-skills/tournament-import/", "executor_model": "claude-opus-4-6", "timestamp": "2026-03-09T23:20:00Z", "evals_run": [1, 2, 3], "runs_per_configuration": 1}, "runs": [{"eval_id": 1, "eval_name": "PS23 Parse with Penalties", "configuration": "with_skill", "run_number": 1, "result": {"pass_rate": 0.8, "passed": 8, "failed": 2, "total": 10, "time_seconds": 195.7, "tokens": 50237, "tool_calls": 18, "errors": 0}, "expectations": [{"text": "All HomeTeamScore and AwayTeamScore values are strings", "passed": true, "evidence": "Found 18 score values. Types: {'str'}"}, {"text": "HomePenaltyScore and AwayPenaltyScore are strings", "passed": false, "evidence": "Found 18 penalty scores. Types: {'str', 'NoneType'} \u2014 agent added null penalty fields to non-penalty fixtures"}, {"text": "PeriodScores uses Home_score and Away_score (snake_case)", "passed": false, "evidence": "Agent used camelCase HomeScore/AwayScore despite skill specifying snake_case"}, {"text": "PeriodScores Type is lowercase 'penalties'", "passed": true, "evidence": "PeriodScore Type values: ['regular_period', 'penalties']"}, {"text": "EventType is 'scorer' for goals, not 'goal'", "passed": true, "evidence": "Event types found: {'scorer'}"}, {"text": "Every Player object has an OtherFullName field", "passed": true, "evidence": "83/83 players have OtherFullName"}, {"text": "Champs array is nested inside League object", "passed": true, "evidence": "Champs in League: True, Champs at root: False"}, {"text": "The 'R. Gutierrez x2' scorer creates exactly 2 separate goal events", "passed": true, "evidence": "Found 7 R. Gutierrez goal events total across all fixtures"}, {"text": "Output contains both Group Stage and Playoffs stages", "passed": true, "evidence": "Stage types found: ['League', 'Playoff']"}, {"text": "All scorers appear in their team's squad", "passed": true, "evidence": "No missing scorers in squads"}]}, {"eval_id": 1, "eval_name": "PS23 Parse with Penalties", "configuration": "without_skill", "run_number": 1, "result": {"pass_rate": 0.1, "passed": 1, "failed": 9, "total": 10, "time_seconds": 50.6, "tokens": 16326, "tool_calls": 4, "errors": 0}, "expectations": [{"text": "All HomeTeamScore and AwayTeamScore values are strings", "passed": false, "evidence": "Used generic field names, not EasyChamp format"}, {"text": "HomePenaltyScore and AwayPenaltyScore are strings", "passed": false, "evidence": "Used home_score/away_score in penalties object"}, {"text": "PeriodScores uses Home_score and Away_score (snake_case)", "passed": false, "evidence": "No PeriodScores field at all"}, {"text": "PeriodScores Type is lowercase 'penalties'", "passed": false, "evidence": "No PeriodScores field at all"}, {"text": "EventType is 'scorer' for goals, not 'goal'", "passed": false, "evidence": "Used 'goal' as event type"}, {"text": "Every Player object has an OtherFullName field", "passed": false, "evidence": "No OtherFullName on any player"}, {"text": "Champs array is nested inside League object", "passed": false, "evidence": "Used completely different structure"}, {"text": "The 'R. Gutierrez x2' scorer creates exactly 2 separate goal events", "passed": true, "evidence": "x2 multiplier correctly parsed into 2 events"}, {"text": "Output contains both Group Stage and Playoffs stages", "passed": false, "evidence": "Used 'round_robin' and 'knockout' instead of 'League' and 'Playoff'"}, {"text": "All scorers appear in their team's squad", "passed": false, "evidence": "Different data structure, no squad concept"}]}, {"eval_id": 2, "eval_name": "Knockout Bracket 8 Teams", "configuration": "with_skill", "run_number": 1, "result": {"pass_rate": 1.0, "passed": 9, "failed": 0, "total": 9, "time_seconds": 96.0, "tokens": 36698, "tool_calls": 12, "errors": 0}, "expectations": [{"text": "Quarterfinal fixtures have Order values from 4-7", "passed": true, "evidence": "QF Order values: [4, 5, 6, 7]"}, {"text": "Semifinal fixtures have Order values 2 and 3", "passed": true, "evidence": "SF Order values: [2, 3]"}, {"text": "Final fixture has Order value 1", "passed": true, "evidence": "Final Order values: [1]"}, {"text": "All matchDayName values are lowercase without hyphens", "passed": true, "evidence": "matchDayName values: {'quarterfinal', 'semifinal', 'final', '3rd_place_playoff'}"}, {"text": "A 3rd place playoff fixture exists", "passed": true, "evidence": "Found 1 3rd place playoff fixture(s)"}, {"text": "Champs array is nested inside League object", "passed": true, "evidence": "Champs in League: True, Champs at root: False"}, {"text": "All scores are strings ('0' not 0)", "passed": true, "evidence": "Score types: {'str'}"}, {"text": "Exactly 8 total playoff fixtures (4+2+1+1)", "passed": true, "evidence": "QF: 4, SF: 2, Final: 1, 3rd: 1 = 8 total"}, {"text": "HomeTeam and AwayTeam are objects with Id and Name", "passed": true, "evidence": "Checked 8 fixtures"}]}, {"eval_id": 2, "eval_name": "Knockout Bracket 8 Teams", "configuration": "without_skill", "run_number": 1, "result": {"pass_rate": 0.0, "passed": 0, "failed": 9, "total": 9, "time_seconds": 33.5, "tokens": 10854, "tool_calls": 3, "errors": 0}, "expectations": [{"text": "Quarterfinal fixtures have Order values from 4-7", "passed": false, "evidence": "Used sequential node numbering 1-4 for QFs instead of binary tree BFS"}, {"text": "Semifinal fixtures have Order values 2 and 3", "passed": false, "evidence": "Used nodes 5-6 for SFs"}, {"text": "Final fixture has Order value 1", "passed": false, "evidence": "Final was node 8 (last) instead of 1 (root)"}, {"text": "All matchDayName values are lowercase without hyphens", "passed": false, "evidence": "Used 'Quarter-finals', 'Semi-finals' (capitalized, hyphenated)"}, {"text": "A 3rd place playoff fixture exists", "passed": false, "evidence": "Used '3rd Place' instead of '3rd_place_playoff'"}, {"text": "Champs array is nested inside League object", "passed": false, "evidence": "Used different structure entirely"}, {"text": "All scores are strings ('0' not 0)", "passed": false, "evidence": "Scores were strings but structure was wrong"}, {"text": "Exactly 8 total playoff fixtures (4+2+1+1)", "passed": false, "evidence": "Had 8 matches but categorization was wrong"}, {"text": "HomeTeam and AwayTeam are objects with Id and Name", "passed": false, "evidence": "Used different team reference format"}]}, {"eval_id": 3, "eval_name": "Diagnose & Fix Broken Import", "configuration": "with_skill", "run_number": 1, "result": {"pass_rate": 0.9, "passed": 9, "failed": 1, "total": 10, "time_seconds": 101.7, "tokens": 33288, "tool_calls": 12, "errors": 0}, "expectations": [{"text": "Identifies scores must be strings", "passed": true, "evidence": "Score type issue identified and fixed"}, {"text": "Identifies 'Quarter-Final' must be 'quarterfinal'", "passed": true, "evidence": "MatchDayName format issue identified"}, {"text": "Identifies 'Semi-Final' must be 'semifinal'", "passed": true, "evidence": "MatchDayName format issue identified"}, {"text": "Identifies PeriodScores must use Home_score/Away_score", "passed": false, "evidence": "PeriodScores snake_case issue not explicitly mentioned in diagnosis"}, {"text": "Identifies PeriodScores Type must be lowercase 'penalties'", "passed": true, "evidence": "PeriodScores Type casing identified"}, {"text": "Identifies EventType 'goal' must be 'scorer'", "passed": true, "evidence": "EventType issue identified"}, {"text": "Identifies Champs at root must be inside League", "passed": true, "evidence": "Champs location issue identified"}, {"text": "Identifies missing OtherFullName on Players", "passed": true, "evidence": "OtherFullName issue identified"}, {"text": "Identifies penalty scores must be strings", "passed": true, "evidence": "Penalty score type identified"}, {"text": "The fixed output file has all issues corrected", "passed": true, "evidence": "scores_strings=True, mdns_valid=True, champs_in_league=True, events_scorer=True"}]}, {"eval_id": 3, "eval_name": "Diagnose & Fix Broken Import", "configuration": "without_skill", "run_number": 1, "result": {"pass_rate": 0.3, "passed": 3, "failed": 7, "total": 10, "time_seconds": 78.3, "tokens": 15186, "tool_calls": 5, "errors": 0}, "expectations": [{"text": "Identifies scores must be strings", "passed": false, "evidence": "Changed string types to numeric enums (wrong direction)"}, {"text": "Identifies 'Quarter-Final' must be 'quarterfinal'", "passed": false, "evidence": "Did not identify matchDayName format issue"}, {"text": "Identifies 'Semi-Final' must be 'semifinal'", "passed": false, "evidence": "Did not identify matchDayName format issue"}, {"text": "Identifies PeriodScores must use Home_score/Away_score", "passed": false, "evidence": "Not mentioned"}, {"text": "Identifies PeriodScores Type must be lowercase 'penalties'", "passed": true, "evidence": "Changed Penalties to numeric but mentioned the issue"}, {"text": "Identifies EventType 'goal' must be 'scorer'", "passed": false, "evidence": "Changed 'goal' to numeric 0 instead of 'scorer'"}, {"text": "Identifies Champs at root must be inside League", "passed": false, "evidence": "Did not identify Champs placement issue"}, {"text": "Identifies missing OtherFullName on Players", "passed": false, "evidence": "Not mentioned"}, {"text": "Identifies penalty scores must be strings", "passed": true, "evidence": "Mentioned penalty type"}, {"text": "The fixed output file has all issues corrected", "passed": true, "evidence": "File exists but contains wrong fixes"}]}], "run_summary": {"with_skill": {"pass_rate": {"mean": 0.9, "stddev": 0.08, "min": 0.8, "max": 1.0}, "time_seconds": {"mean": 131.1, "stddev": 43.1, "min": 96.0, "max": 195.7}, "tokens": {"mean": 40074, "stddev": 7307, "min": 33288, "max": 50237}}, "without_skill": {"pass_rate": {"mean": 0.13, "stddev": 0.12, "min": 0.0, "max": 0.3}, "time_seconds": {"mean": 54.1, "stddev": 18.4, "min": 33.5, "max": 78.3}, "tokens": {"mean": 14122, "stddev": 2320, "min": 10854, "max": 16326}}, "delta": {"pass_rate": "+0.77", "time_seconds": "+77.0", "tokens": "+25952"}}, "notes": ["PeriodScores Home_score/Away_score (snake_case) consistently fails even WITH skill \u2014 the skill mentions this but not prominently enough. This is the #1 improvement opportunity.", "Without-skill Eval 2 (Bracket) scored 0% \u2014 binary tree BFS ordering is completely unknown without domain knowledge.", "Without-skill Eval 3 made ANTI-CORRECT fixes (converting strings to numeric enums), demonstrating that general-purpose reasoning actively harms EasyChamp-specific formatting.", "Skill adds ~77s average execution time but improves pass rate by 77 percentage points (0.13 \u2192 0.90).", "Token usage is ~2.8x higher with skill (40K vs 14K), primarily due to reading skill documentation.", "The 'x2' multiplier parsing passed in both configurations \u2014 this is a general-purpose capability, not skill-specific.", "HomePenaltyScore assertion has a grading false-positive: collects null values from non-penalty fixtures. Consider tightening the assertion to only check fixtures with HasPenalties=true."]}};
+
+    // ---- State ----
+    let feedbackMap = {};  // run_id -> feedback text
+    let currentIndex = 0;
+    let visitedRuns = new Set();
+
+    // ---- Init ----
+    async function init() {
+      // Load saved feedback from server — but only if this isn't a fresh
+      // iteration (indicated by previous_feedback being present). When
+      // previous feedback exists, the feedback.json on disk is stale from
+      // the prior iteration and should not pre-fill the textareas.
+      const hasPrevious = Object.keys(EMBEDDED_DATA.previous_feedback || {}).length > 0
+        || Object.keys(EMBEDDED_DATA.previous_outputs || {}).length > 0;
+      if (!hasPrevious) {
+        try {
+          const resp = await fetch("/api/feedback");
+          const data = await resp.json();
+          if (data.reviews) {
+            for (const r of data.reviews) feedbackMap[r.run_id] = r.feedback;
+          }
+        } catch { /* first run, no feedback yet */ }
+      }
+
+      document.getElementById("skill-name").textContent = EMBEDDED_DATA.skill_name;
+      showRun(0);
+
+      // Wire up feedback auto-save
+      const textarea = document.getElementById("feedback");
+      let saveTimeout = null;
+      textarea.addEventListener("input", () => {
+        clearTimeout(saveTimeout);
+        document.getElementById("feedback-status").textContent = "";
+        saveTimeout = setTimeout(() => saveCurrentFeedback(), 800);
+      });
+    }
+
+    // ---- Navigation ----
+    function navigate(delta) {
+      const newIndex = currentIndex + delta;
+      if (newIndex >= 0 && newIndex < EMBEDDED_DATA.runs.length) {
+        saveCurrentFeedback();
+        showRun(newIndex);
+      }
+    }
+
+    function updateNavButtons() {
+      document.getElementById("prev-btn").disabled = currentIndex === 0;
+      document.getElementById("next-btn").disabled =
+        currentIndex === EMBEDDED_DATA.runs.length - 1;
+    }
+
+    // ---- Show a run ----
+    function showRun(index) {
+      currentIndex = index;
+      const run = EMBEDDED_DATA.runs[index];
+
+      // Progress
+      document.getElementById("progress").textContent =
+        `${index + 1} of ${EMBEDDED_DATA.runs.length}`;
+
+      // Prompt
+      document.getElementById("prompt-text").textContent = run.prompt;
+
+      // Config badge
+      const badge = document.getElementById("config-badge");
+      const configMatch = run.id.match(/(with_skill|without_skill|new_skill|old_skill)/);
+      if (configMatch) {
+        const config = configMatch[1];
+        const isBaseline = config === "without_skill" || config === "old_skill";
+        badge.textContent = config.replace(/_/g, " ");
+        badge.className = "config-badge " + (isBaseline ? "config-baseline" : "config-primary");
+        badge.style.display = "inline-block";
+      } else {
+        badge.style.display = "none";
+      }
+
+      // Outputs
+      renderOutputs(run);
+
+      // Previous outputs
+      renderPrevOutputs(run);
+
+      // Grades
+      renderGrades(run);
+
+      // Previous feedback
+      const prevFb = (EMBEDDED_DATA.previous_feedback || {})[run.id];
+      const prevEl = document.getElementById("prev-feedback");
+      if (prevFb) {
+        document.getElementById("prev-feedback-text").textContent = prevFb;
+        prevEl.style.display = "block";
+      } else {
+        prevEl.style.display = "none";
+      }
+
+      // Feedback
+      document.getElementById("feedback").value = feedbackMap[run.id] || "";
+      document.getElementById("feedback-status").textContent = "";
+
+      updateNavButtons();
+
+      // Track visited runs and promote done button when all visited
+      visitedRuns.add(index);
+      const doneBtn = document.getElementById("done-btn");
+      if (visitedRuns.size >= EMBEDDED_DATA.runs.length) {
+        doneBtn.classList.add("ready");
+      }
+
+      // Scroll main content to top
+      document.querySelector(".main").scrollTop = 0;
+    }
+
+    // ---- Render outputs ----
+    function renderOutputs(run) {
+      const container = document.getElementById("outputs-body");
+      container.innerHTML = "";
+
+      const outputs = run.outputs || [];
+      if (outputs.length === 0) {
+        container.innerHTML = '<div class="empty-state">No output files</div>';
+        return;
+      }
+
+      for (const file of outputs) {
+        const fileDiv = document.createElement("div");
+        fileDiv.className = "output-file";
+
+        // Always show file header with download link
+        const header = document.createElement("div");
+        header.className = "output-file-header";
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = file.name;
+        header.appendChild(nameSpan);
+        const dlBtn = document.createElement("a");
+        dlBtn.className = "dl-btn";
+        dlBtn.textContent = "Download";
+        dlBtn.download = file.name;
+        dlBtn.href = getDownloadUri(file);
+        header.appendChild(dlBtn);
+        fileDiv.appendChild(header);
+
+        const content = document.createElement("div");
+        content.className = "output-file-content";
+
+        if (file.type === "text") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          content.appendChild(pre);
+        } else if (file.type === "image") {
+          const img = document.createElement("img");
+          img.src = file.data_uri;
+          img.alt = file.name;
+          content.appendChild(img);
+        } else if (file.type === "pdf") {
+          const iframe = document.createElement("iframe");
+          iframe.src = file.data_uri;
+          content.appendChild(iframe);
+        } else if (file.type === "xlsx") {
+          renderXlsx(content, file.data_b64);
+        } else if (file.type === "binary") {
+          const a = document.createElement("a");
+          a.className = "download-link";
+          a.href = file.data_uri;
+          a.download = file.name;
+          a.textContent = "Download " + file.name;
+          content.appendChild(a);
+        } else if (file.type === "error") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          pre.style.color = "var(--red)";
+          content.appendChild(pre);
+        }
+
+        fileDiv.appendChild(content);
+        container.appendChild(fileDiv);
+      }
+    }
+
+    // ---- XLSX rendering via SheetJS ----
+    function renderXlsx(container, b64Data) {
+      try {
+        const raw = Uint8Array.from(atob(b64Data), c => c.charCodeAt(0));
+        const wb = XLSX.read(raw, { type: "array" });
+
+        for (let i = 0; i < wb.SheetNames.length; i++) {
+          const sheetName = wb.SheetNames[i];
+          const ws = wb.Sheets[sheetName];
+
+          if (wb.SheetNames.length > 1) {
+            const sheetLabel = document.createElement("div");
+            sheetLabel.style.cssText =
+              "font-weight:600; font-size:0.8rem; color:#b0aea5; margin-top:0.5rem; margin-bottom:0.25rem;";
+            sheetLabel.textContent = "Sheet: " + sheetName;
+            container.appendChild(sheetLabel);
+          }
+
+          const htmlStr = XLSX.utils.sheet_to_html(ws, { editable: false });
+          const wrapper = document.createElement("div");
+          wrapper.innerHTML = htmlStr;
+          container.appendChild(wrapper);
+        }
+      } catch (err) {
+        container.textContent = "Error rendering spreadsheet: " + err.message;
+      }
+    }
+
+    // ---- Grades ----
+    function renderGrades(run) {
+      const section = document.getElementById("grades-section");
+      const content = document.getElementById("grades-content");
+
+      if (!run.grading) {
+        section.style.display = "none";
+        return;
+      }
+
+      const grading = run.grading;
+      section.style.display = "block";
+      // Reset to collapsed
+      content.classList.remove("open");
+      document.getElementById("grades-arrow").classList.remove("open");
+
+      const summary = grading.summary || {};
+      const expectations = grading.expectations || [];
+
+      let html = '<div style="padding: 1rem;">';
+
+      // Summary line
+      const passRate = summary.pass_rate != null
+        ? Math.round(summary.pass_rate * 100) + "%"
+        : "?";
+      const badgeClass = summary.pass_rate >= 0.8 ? "grade-pass" : summary.pass_rate >= 0.5 ? "" : "grade-fail";
+      html += '<div class="grades-summary">';
+      html += '<span class="grade-badge ' + badgeClass + '">' + passRate + '</span>';
+      html += '<span>' + (summary.passed || 0) + ' passed, ' + (summary.failed || 0) + ' failed of ' + (summary.total || 0) + '</span>';
+      html += '</div>';
+
+      // Assertions list
+      html += '<ul class="assertion-list">';
+      for (const exp of expectations) {
+        const statusClass = exp.passed ? "pass" : "fail";
+        const statusIcon = exp.passed ? "\u2713" : "\u2717";
+        html += '<li class="assertion-item">';
+        html += '<span class="assertion-status ' + statusClass + '">' + statusIcon + '</span>';
+        html += '<span>' + escapeHtml(exp.text) + '</span>';
+        if (exp.evidence) {
+          html += '<div class="assertion-evidence">' + escapeHtml(exp.evidence) + '</div>';
+        }
+        html += '</li>';
+      }
+      html += '</ul>';
+
+      html += '</div>';
+      content.innerHTML = html;
+    }
+
+    function toggleGrades() {
+      const content = document.getElementById("grades-content");
+      const arrow = document.getElementById("grades-arrow");
+      content.classList.toggle("open");
+      arrow.classList.toggle("open");
+    }
+
+    // ---- Previous outputs (collapsible) ----
+    function renderPrevOutputs(run) {
+      const section = document.getElementById("prev-outputs-section");
+      const content = document.getElementById("prev-outputs-content");
+      const prevOutputs = (EMBEDDED_DATA.previous_outputs || {})[run.id];
+
+      if (!prevOutputs || prevOutputs.length === 0) {
+        section.style.display = "none";
+        return;
+      }
+
+      section.style.display = "block";
+      // Reset to collapsed
+      content.classList.remove("open");
+      document.getElementById("prev-outputs-arrow").classList.remove("open");
+
+      // Render the files into the content area
+      content.innerHTML = "";
+      const wrapper = document.createElement("div");
+      wrapper.style.padding = "1rem";
+
+      for (const file of prevOutputs) {
+        const fileDiv = document.createElement("div");
+        fileDiv.className = "output-file";
+
+        const header = document.createElement("div");
+        header.className = "output-file-header";
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = file.name;
+        header.appendChild(nameSpan);
+        const dlBtn = document.createElement("a");
+        dlBtn.className = "dl-btn";
+        dlBtn.textContent = "Download";
+        dlBtn.download = file.name;
+        dlBtn.href = getDownloadUri(file);
+        header.appendChild(dlBtn);
+        fileDiv.appendChild(header);
+
+        const fc = document.createElement("div");
+        fc.className = "output-file-content";
+
+        if (file.type === "text") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          fc.appendChild(pre);
+        } else if (file.type === "image") {
+          const img = document.createElement("img");
+          img.src = file.data_uri;
+          img.alt = file.name;
+          fc.appendChild(img);
+        } else if (file.type === "pdf") {
+          const iframe = document.createElement("iframe");
+          iframe.src = file.data_uri;
+          fc.appendChild(iframe);
+        } else if (file.type === "xlsx") {
+          renderXlsx(fc, file.data_b64);
+        } else if (file.type === "binary") {
+          const a = document.createElement("a");
+          a.className = "download-link";
+          a.href = file.data_uri;
+          a.download = file.name;
+          a.textContent = "Download " + file.name;
+          fc.appendChild(a);
+        }
+
+        fileDiv.appendChild(fc);
+        wrapper.appendChild(fileDiv);
+      }
+
+      content.appendChild(wrapper);
+    }
+
+    function togglePrevOutputs() {
+      const content = document.getElementById("prev-outputs-content");
+      const arrow = document.getElementById("prev-outputs-arrow");
+      content.classList.toggle("open");
+      arrow.classList.toggle("open");
+    }
+
+    // ---- Feedback (saved to server -> feedback.json) ----
+    function saveCurrentFeedback() {
+      const run = EMBEDDED_DATA.runs[currentIndex];
+      const text = document.getElementById("feedback").value;
+
+      if (text.trim() === "") {
+        delete feedbackMap[run.id];
+      } else {
+        feedbackMap[run.id] = text;
+      }
+
+      // Build reviews array from map
+      const reviews = [];
+      for (const [run_id, feedback] of Object.entries(feedbackMap)) {
+        if (feedback.trim()) {
+          reviews.push({ run_id, feedback, timestamp: new Date().toISOString() });
+        }
+      }
+
+      fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reviews, status: "in_progress" }),
+      }).then(() => {
+        document.getElementById("feedback-status").textContent = "Saved";
+      }).catch(() => {
+        // Static mode or server unavailable — no-op on auto-save,
+        // feedback will be downloaded on final submit
+        document.getElementById("feedback-status").textContent = "Will download on submit";
+      });
+    }
+
+    // ---- Done ----
+    function showDoneDialog() {
+      // Save current textarea to feedbackMap (but don't POST yet)
+      const run = EMBEDDED_DATA.runs[currentIndex];
+      const text = document.getElementById("feedback").value;
+      if (text.trim() === "") {
+        delete feedbackMap[run.id];
+      } else {
+        feedbackMap[run.id] = text;
+      }
+
+      // POST once with status: complete — include ALL runs so the model
+      // can distinguish "no feedback" (looks good) from "not reviewed"
+      const reviews = [];
+      const ts = new Date().toISOString();
+      for (const r of EMBEDDED_DATA.runs) {
+        reviews.push({ run_id: r.id, feedback: feedbackMap[r.id] || "", timestamp: ts });
+      }
+      const payload = JSON.stringify({ reviews, status: "complete" }, null, 2);
+      fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: payload,
+      }).then(() => {
+        document.getElementById("done-overlay").classList.add("visible");
+      }).catch(() => {
+        // Server not available (static mode) — download as file
+        const blob = new Blob([payload], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "feedback.json";
+        a.click();
+        URL.revokeObjectURL(url);
+        document.getElementById("done-overlay").classList.add("visible");
+      });
+    }
+
+    function closeDoneDialog() {
+      // Reset status back to in_progress
+      saveCurrentFeedback();
+      document.getElementById("done-overlay").classList.remove("visible");
+    }
+
+    // ---- Toast ----
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.add("visible");
+      setTimeout(() => toast.classList.remove("visible"), 2000);
+    }
+
+    // ---- Keyboard nav ----
+    document.addEventListener("keydown", (e) => {
+      // Don't capture when typing in textarea
+      if (e.target.tagName === "TEXTAREA") return;
+
+      if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+        e.preventDefault();
+        navigate(-1);
+      } else if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+        e.preventDefault();
+        navigate(1);
+      }
+    });
+
+    // ---- Util ----
+    function getDownloadUri(file) {
+      if (file.data_uri) return file.data_uri;
+      if (file.data_b64) return "data:application/octet-stream;base64," + file.data_b64;
+      if (file.type === "text") return "data:text/plain;charset=utf-8," + encodeURIComponent(file.content);
+      return "#";
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // ---- View switching ----
+    function switchView(view) {
+      document.querySelectorAll(".view-tab").forEach(t => t.classList.remove("active"));
+      document.querySelectorAll(".view-panel").forEach(p => p.classList.remove("active"));
+      document.querySelector(`[onclick="switchView('${view}')"]`).classList.add("active");
+      document.getElementById("panel-" + view).classList.add("active");
+    }
+
+    // ---- Benchmark rendering ----
+    function renderBenchmark() {
+      const data = EMBEDDED_DATA.benchmark;
+      if (!data) return;
+
+      // Show the tabs
+      document.getElementById("view-tabs").style.display = "flex";
+
+      const container = document.getElementById("benchmark-content");
+      const summary = data.run_summary || {};
+      const metadata = data.metadata || {};
+      const notes = data.notes || [];
+
+      let html = "";
+
+      // Header
+      html += "<h2 style='font-family: Poppins, sans-serif; margin-bottom: 0.5rem;'>Benchmark Results</h2>";
+      html += "<p style='color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1.25rem;'>";
+      if (metadata.skill_name) html += "<strong>" + escapeHtml(metadata.skill_name) + "</strong> &mdash; ";
+      if (metadata.timestamp) html += metadata.timestamp + " &mdash; ";
+      if (metadata.evals_run) html += "Evals: " + metadata.evals_run.join(", ") + " &mdash; ";
+      html += (metadata.runs_per_configuration || "?") + " runs per configuration";
+      html += "</p>";
+
+      // Summary table
+      html += '<table class="benchmark-table">';
+
+      function fmtStat(stat, pct) {
+        if (!stat) return "—";
+        const suffix = pct ? "%" : "";
+        const m = pct ? (stat.mean * 100).toFixed(0) : stat.mean.toFixed(1);
+        const s = pct ? (stat.stddev * 100).toFixed(0) : stat.stddev.toFixed(1);
+        return m + suffix + " ± " + s + suffix;
+      }
+
+      function deltaClass(val) {
+        if (!val) return "";
+        const n = parseFloat(val);
+        if (n > 0) return "benchmark-delta-positive";
+        if (n < 0) return "benchmark-delta-negative";
+        return "";
+      }
+
+      // Discover config names dynamically (everything except "delta")
+      const configs = Object.keys(summary).filter(k => k !== "delta");
+      const configA = configs[0] || "config_a";
+      const configB = configs[1] || "config_b";
+      const labelA = configA.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+      const labelB = configB.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+      const a = summary[configA] || {};
+      const b = summary[configB] || {};
+      const delta = summary.delta || {};
+
+      html += "<thead><tr><th>Metric</th><th>" + escapeHtml(labelA) + "</th><th>" + escapeHtml(labelB) + "</th><th>Delta</th></tr></thead>";
+      html += "<tbody>";
+
+      html += "<tr><td><strong>Pass Rate</strong></td>";
+      html += "<td>" + fmtStat(a.pass_rate, true) + "</td>";
+      html += "<td>" + fmtStat(b.pass_rate, true) + "</td>";
+      html += '<td class="' + deltaClass(delta.pass_rate) + '">' + (delta.pass_rate || "—") + "</td></tr>";
+
+      // Time (only show row if data exists)
+      if (a.time_seconds || b.time_seconds) {
+        html += "<tr><td><strong>Time (s)</strong></td>";
+        html += "<td>" + fmtStat(a.time_seconds, false) + "</td>";
+        html += "<td>" + fmtStat(b.time_seconds, false) + "</td>";
+        html += '<td class="' + deltaClass(delta.time_seconds) + '">' + (delta.time_seconds ? delta.time_seconds + "s" : "—") + "</td></tr>";
+      }
+
+      // Tokens (only show row if data exists)
+      if (a.tokens || b.tokens) {
+        html += "<tr><td><strong>Tokens</strong></td>";
+        html += "<td>" + fmtStat(a.tokens, false) + "</td>";
+        html += "<td>" + fmtStat(b.tokens, false) + "</td>";
+        html += '<td class="' + deltaClass(delta.tokens) + '">' + (delta.tokens || "—") + "</td></tr>";
+      }
+
+      html += "</tbody></table>";
+
+      // Per-eval breakdown (if runs data available)
+      const runs = data.runs || [];
+      if (runs.length > 0) {
+        const evalIds = [...new Set(runs.map(r => r.eval_id))].sort((a, b) => a - b);
+
+        html += "<h3 style='font-family: Poppins, sans-serif; margin-bottom: 0.75rem;'>Per-Eval Breakdown</h3>";
+
+        const hasTime = runs.some(r => r.result && r.result.time_seconds != null);
+        const hasErrors = runs.some(r => r.result && r.result.errors > 0);
+
+        for (const evalId of evalIds) {
+          const evalRuns = runs.filter(r => r.eval_id === evalId);
+          const evalName = evalRuns[0] && evalRuns[0].eval_name ? evalRuns[0].eval_name : "Eval " + evalId;
+
+          html += "<h4 style='font-family: Poppins, sans-serif; margin: 1rem 0 0.5rem; color: var(--text);'>" + escapeHtml(evalName) + "</h4>";
+          html += '<table class="benchmark-table">';
+          html += "<thead><tr><th>Config</th><th>Run</th><th>Pass Rate</th>";
+          if (hasTime) html += "<th>Time (s)</th>";
+          if (hasErrors) html += "<th>Crashes During Execution</th>";
+          html += "</tr></thead>";
+          html += "<tbody>";
+
+          // Group by config and render with average rows
+          const configGroups = [...new Set(evalRuns.map(r => r.configuration))];
+          for (let ci = 0; ci < configGroups.length; ci++) {
+            const config = configGroups[ci];
+            const configRuns = evalRuns.filter(r => r.configuration === config);
+            if (configRuns.length === 0) continue;
+
+            const rowClass = ci === 0 ? "benchmark-row-with" : "benchmark-row-without";
+            const configLabel = config.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+
+            for (const run of configRuns) {
+              const r = run.result || {};
+              const prClass = r.pass_rate >= 0.8 ? "benchmark-delta-positive" : r.pass_rate < 0.5 ? "benchmark-delta-negative" : "";
+              html += '<tr class="' + rowClass + '">';
+              html += "<td>" + configLabel + "</td>";
+              html += "<td>" + run.run_number + "</td>";
+              html += '<td class="' + prClass + '">' + ((r.pass_rate || 0) * 100).toFixed(0) + "% (" + (r.passed || 0) + "/" + (r.total || 0) + ")</td>";
+              if (hasTime) html += "<td>" + (r.time_seconds != null ? r.time_seconds.toFixed(1) : "—") + "</td>";
+              if (hasErrors) html += "<td>" + (r.errors || 0) + "</td>";
+              html += "</tr>";
+            }
+
+            // Average row
+            const rates = configRuns.map(r => (r.result || {}).pass_rate || 0);
+            const avgRate = rates.reduce((a, b) => a + b, 0) / rates.length;
+            const avgPrClass = avgRate >= 0.8 ? "benchmark-delta-positive" : avgRate < 0.5 ? "benchmark-delta-negative" : "";
+            html += '<tr class="benchmark-row-avg ' + rowClass + '">';
+            html += "<td>" + configLabel + "</td>";
+            html += "<td>Avg</td>";
+            html += '<td class="' + avgPrClass + '">' + (avgRate * 100).toFixed(0) + "%</td>";
+            if (hasTime) {
+              const times = configRuns.map(r => (r.result || {}).time_seconds).filter(t => t != null);
+              html += "<td>" + (times.length ? (times.reduce((a, b) => a + b, 0) / times.length).toFixed(1) : "—") + "</td>";
+            }
+            if (hasErrors) html += "<td></td>";
+            html += "</tr>";
+          }
+          html += "</tbody></table>";
+
+          // Per-assertion detail for this eval
+          const runsWithExpectations = {};
+          for (const config of configGroups) {
+            runsWithExpectations[config] = evalRuns.filter(r => r.configuration === config && r.expectations && r.expectations.length > 0);
+          }
+          const hasAnyExpectations = Object.values(runsWithExpectations).some(runs => runs.length > 0);
+          if (hasAnyExpectations) {
+            // Collect all unique assertion texts across all configs
+            const allAssertions = [];
+            const seen = new Set();
+            for (const config of configGroups) {
+              for (const run of runsWithExpectations[config]) {
+                for (const exp of (run.expectations || [])) {
+                  if (!seen.has(exp.text)) {
+                    seen.add(exp.text);
+                    allAssertions.push(exp.text);
+                  }
+                }
+              }
+            }
+
+            html += '<table class="benchmark-table" style="margin-top: 0.5rem;">';
+            html += "<thead><tr><th>Assertion</th>";
+            for (const config of configGroups) {
+              const label = config.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+              html += "<th>" + escapeHtml(label) + "</th>";
+            }
+            html += "</tr></thead><tbody>";
+
+            for (const assertionText of allAssertions) {
+              html += "<tr><td>" + escapeHtml(assertionText) + "</td>";
+
+              for (const config of configGroups) {
+                html += "<td>";
+                for (const run of runsWithExpectations[config]) {
+                  const exp = (run.expectations || []).find(e => e.text === assertionText);
+                  if (exp) {
+                    const cls = exp.passed ? "benchmark-delta-positive" : "benchmark-delta-negative";
+                    const icon = exp.passed ? "\u2713" : "\u2717";
+                    html += '<span class="' + cls + '" title="Run ' + run.run_number + ': ' + escapeHtml(exp.evidence || "") + '">' + icon + "</span> ";
+                  } else {
+                    html += "— ";
+                  }
+                }
+                html += "</td>";
+              }
+              html += "</tr>";
+            }
+            html += "</tbody></table>";
+          }
+        }
+      }
+
+      // Notes
+      if (notes.length > 0) {
+        html += '<div class="benchmark-notes">';
+        html += "<h3>Analysis Notes</h3>";
+        html += "<ul>";
+        for (const note of notes) {
+          html += "<li>" + escapeHtml(note) + "</li>";
+        }
+        html += "</ul></div>";
+      }
+
+      container.innerHTML = html;
+    }
+
+    // ---- Start ----
+    init();
+    renderBenchmark();
+  </script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+{
+  "eval_id": 1,
+  "eval_name": "ps23-parse-with-penalties",
+  "prompt": "I have PS23 Soccer JSON data for a 4-team mini-league called 'Copa Verano 2026' in Mexico. The data includes 6 group stage matches and playoffs (2 semifinals + a final that went to penalties 4-3). Parse this data and generate a valid EasyChamp import JSON file ready for POST /import/league. The PS23 data file is at evals/files/ps23-copa-verano.json. Use the existing PS23 parser if available, or generate the import JSON manually following EasyChamp's import format.",
+  "assertions": [
+    "All HomeTeamScore and AwayTeamScore values are strings (e.g., '3' not 3)",
+    "HomePenaltyScore and AwayPenaltyScore are strings (e.g., '4' not 4)",
+    "PeriodScores uses Home_score and Away_score (snake_case), not HomeScore/AwayScore",
+    "PeriodScores Type is lowercase 'penalties', not 'Penalties'",
+    "EventType is 'scorer' for goals, not 'goal'",
+    "Every Player object has an OtherFullName field (even if empty string)",
+    "Champs array is nested inside League object, not at root level",
+    "The 'R. Gutierrez x2' scorer creates exactly 2 separate goal events",
+    "Output contains both a Group Stage (Type: League) and Playoffs (Type: Playoff) stage",
+    "All scorers appear in their team's squad for that fixture"
+  ]
+}

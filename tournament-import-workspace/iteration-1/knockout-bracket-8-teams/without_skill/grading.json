@@ -1,0 +1,55 @@
+{
+  "expectations": [
+    {
+      "text": "Quarterfinal fixtures have Order values from 4-7",
+      "passed": false,
+      "evidence": "QF Order values: []"
+    },
+    {
+      "text": "Semifinal fixtures have Order values 2 and 3",
+      "passed": false,
+      "evidence": "SF Order values: []"
+    },
+    {
+      "text": "Final fixture has Order value 1",
+      "passed": false,
+      "evidence": "Final Order values: []"
+    },
+    {
+      "text": "All matchDayName values are lowercase without hyphens",
+      "passed": false,
+      "evidence": "matchDayName values: set()"
+    },
+    {
+      "text": "A 3rd place playoff fixture exists",
+      "passed": false,
+      "evidence": "Found 0 3rd place playoff fixture(s)"
+    },
+    {
+      "text": "Champs array is nested inside League object",
+      "passed": false,
+      "evidence": "Champs in League: False, Champs at root: False"
+    },
+    {
+      "text": "All scores are strings ('0' not 0)",
+      "passed": false,
+      "evidence": "No scores found"
+    },
+    {
+      "text": "Exactly 8 total playoff fixtures (4+2+1+1)",
+      "passed": false,
+      "evidence": "QF: 0, SF: 0, Final: 0, 3rd: 0 = 0 total"
+    },
+    {
+      "text": "HomeTeam and AwayTeam are objects with Id and Name",
+      "passed": false,
+      "evidence": "Checked 0 fixtures"
+    }
+  ],
+  "summary": {
+    "passed": 0,
+    "failed": 9,
+    "total": 9,
+    "pass_rate": 0.0
+  }
+}

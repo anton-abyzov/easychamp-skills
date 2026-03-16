@@ -1,0 +1,60 @@
+{
+  "expectations": [
+    {
+      "text": "All HomeTeamScore and AwayTeamScore values are strings",
+      "passed": false,
+      "evidence": "No score fields found"
+    },
+    {
+      "text": "HomePenaltyScore and AwayPenaltyScore are strings",
+      "passed": false,
+      "evidence": "No penalty score fields found"
+    },
+    {
+      "text": "PeriodScores uses Home_score and Away_score (snake_case)",
+      "passed": false,
+      "evidence": "snake_case found: False, camelCase found: False"
+    },
+    {
+      "text": "PeriodScores Type is lowercase 'penalties'",
+      "passed": false,
+      "evidence": "No PeriodScores Type found"
+    },
+    {
+      "text": "EventType is 'scorer' for goals, not 'goal'",
+      "passed": false,
+      "evidence": "No EventType fields found"
+    },
+    {
+      "text": "Every Player object has an OtherFullName field",
+      "passed": false,
+      "evidence": "0/0 players have OtherFullName"
+    },
+    {
+      "text": "Champs array is nested inside League object",
+      "passed": false,
+      "evidence": "Champs in League: False, Champs at root: False"
+    },
+    {
+      "text": "The 'R. Gutierrez x2' scorer creates exactly 2 separate goal events",
+      "passed": false,
+      "evidence": "Found 0 R. Gutierrez goal events total across all fixtures"
+    },
+    {
+      "text": "Output contains both Group Stage (Type: League) and Playoffs (Type: Playoff)",
+      "passed": false,
+      "evidence": "Stage types found: []"
+    },
+    {
+      "text": "All scorers appear in their team's squad",
+      "passed": true,
+      "evidence": "No missing scorers in squads"
+    }
+  ],
+  "summary": {
+    "passed": 1,
+    "failed": 9,
+    "total": 10,
+    "pass_rate": 0.1
+  }
+}

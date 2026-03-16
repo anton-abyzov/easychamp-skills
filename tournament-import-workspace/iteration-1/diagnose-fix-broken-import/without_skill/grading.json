@@ -1,0 +1,60 @@
+{
+  "expectations": [
+    {
+      "text": "Identifies that scores are numbers and must be strings",
+      "passed": true,
+      "evidence": "Diagnosis mentions score type issue"
+    },
+    {
+      "text": "Identifies 'Quarter-Final' must be 'quarterfinal'",
+      "passed": false,
+      "evidence": "Quarter-Final format issue mentioned"
+    },
+    {
+      "text": "Identifies 'Semi-Final' must be 'semifinal'",
+      "passed": false,
+      "evidence": "Semi-Final format issue mentioned"
+    },
+    {
+      "text": "Identifies PeriodScores must use Home_score/Away_score",
+      "passed": false,
+      "evidence": "Not mentioned"
+    },
+    {
+      "text": "Identifies PeriodScores Type must be lowercase 'penalties'",
+      "passed": true,
+      "evidence": "PeriodScores Type casing mentioned"
+    },
+    {
+      "text": "Identifies EventType 'goal' must be 'scorer'",
+      "passed": false,
+      "evidence": "Not mentioned"
+    },
+    {
+      "text": "Identifies Champs at root must be inside League",
+      "passed": false,
+      "evidence": "Not mentioned"
+    },
+    {
+      "text": "Identifies missing OtherFullName on Players",
+      "passed": false,
+      "evidence": "Not mentioned"
+    },
+    {
+      "text": "Identifies penalty scores must be strings",
+      "passed": true,
+      "evidence": "Penalty score type mentioned"
+    },
+    {
+      "text": "The fixed output file has all issues corrected",
+      "passed": false,
+      "evidence": "scores_strings=False, mdns_valid=False, champs_in_league=False, events_scorer=False"
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 7,
+    "total": 10,
+    "pass_rate": 0.3
+  }
+}

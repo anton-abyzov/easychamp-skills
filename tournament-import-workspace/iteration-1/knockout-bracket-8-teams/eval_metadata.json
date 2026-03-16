@@ -1,0 +1,16 @@
+{
+  "eval_id": 2,
+  "eval_name": "knockout-bracket-8-teams",
+  "prompt": "Create an EasyChamp import JSON for an 8-team knockout tournament called 'Copa Primavera 2026' under 'Liga Juvenil AR' league (Argentina, Soccer). The 8 teams are: Pumas FC, Rayos del Norte, Condores SC, Toros United, Panteras CF, Vikingos FC, Delfines SC, and Leones Azules. Generate the full bracket structure with quarterfinals, semifinals, final, and 3rd place playoff. All matches should have Status 0 (not yet played) with scores '0'-'0'. Use proper binary tree node ordering for the bracket. The import should be ready for POST /import/league.",
+  "assertions": [
+    "Quarterfinal fixtures have Order values from 4-7 (binary tree node IDs for depth 2)",
+    "Semifinal fixtures have Order values 2 and 3 (binary tree node IDs for depth 1)",
+    "Final fixture has Order value 1 (binary tree root node)",
+    "All matchDayName values are lowercase without hyphens: 'quarterfinal', 'semifinal', 'final', '3rd_place_playoff'",
+    "A 3rd place playoff fixture exists with matchDayName '3rd_place_playoff'",
+    "Champs array is nested inside League object, not at root level",
+    "All scores are strings ('0' not 0)",
+    "There are exactly 4 quarterfinal + 2 semifinal + 1 final + 1 third place = 8 total playoff fixtures",
+    "HomeTeam and AwayTeam are objects with at least Id and Name fields, not string IDs"
+  ]
+}

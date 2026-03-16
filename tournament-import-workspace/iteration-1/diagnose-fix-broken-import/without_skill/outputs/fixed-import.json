@@ -1,0 +1,177 @@
+{
+  "ImportSource": 99,
+  "ImportMode": 0,
+  "League": {
+    "Name": "Copa Regional",
+    "Country": "Argentina",
+    "SportKindName": "Soccer",
+    "ImageUrl": null
+  },
+  "Champs": [
+    {
+      "Name": "Copa Regional 2026",
+      "ExternalId": "copa-regional-2026",
+      "StartDate": "2026-03-01",
+      "EndDate": "2026-05-30",
+      "IsComplete": false,
+      "SportKindName": "Soccer",
+      "LeagueName": "Copa Regional",
+      "Stages": [
+        {
+          "Name": "Group Stage",
+          "Type": 0,
+          "Groups": [
+            {
+              "Name": "Group A",
+              "Fixtures": [
+                {
+                  "Id": "fixture-1",
+                  "Date": "2026-03-01",
+                  "HomeTeamScore": 2,
+                  "AwayTeamScore": 1,
+                  "MatchDay": 1,
+                  "MatchDayName": "1",
+                  "Status": 2,
+                  "HomeTeam": {
+                    "Id": "team-atlas",
+                    "Name": "Club Atlas",
+                    "ImageUrl": null,
+                    "SportKindName": "Soccer",
+                    "TeamMembers": [
+                      {
+                        "Player": {
+                          "FullName": "Carlos Medina",
+                          "Id": "player-medina",
+                          "SportKindName": "Soccer"
+                        }
+                      },
+                      {
+                        "Player": {
+                          "FullName": "Diego Suarez",
+                          "Id": "player-suarez",
+                          "SportKindName": "Soccer"
+                        }
+                      }
+                    ]
+                  },
+                  "AwayTeam": {
+                    "Id": "team-river",
+                    "Name": "River Plate Jr",
+                    "ImageUrl": null,
+                    "SportKindName": "Soccer",
+                    "TeamMembers": []
+                  },
+                  "HomeSquad": [
+                    {
+                      "Player": {
+                        "FullName": "Carlos Medina",
+                        "Id": "player-medina",
+                        "SportKindName": "Soccer"
+                      },
+                      "SquadType": 0,
+                      "IsPlayed": true
+                    }
+                  ],
+                  "AwaySquad": [],
+                  "Events": [
+                    {
+                      "IsHomeEvent": true,
+                      "Minute": 15,
+                      "EventType": 0,
+                      "Player": {
+                        "FullName": "Carlos Medina",
+                        "Id": "player-medina",
+                        "SportKindName": "Soccer"
+                      },
+                      "Description": "Goal by Medina"
+                    },
+                    {
+                      "IsHomeEvent": true,
+                      "Minute": 67,
+                      "EventType": 0,
+                      "Player": {
+                        "FullName": "Diego Suarez",
+                        "Id": "player-suarez",
+                        "SportKindName": "Soccer"
+                      },
+                      "Description": "Goal by Suarez"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Name": "Playoffs",
+          "Type": 1,
+          "Groups": [
+            {
+              "Name": "Playoffs",
+              "Fixtures": [
+                {
+                  "Id": "fixture-qf1",
+                  "Date": "2026-05-01",
+                  "HomeTeamScore": 2,
+                  "AwayTeamScore": 2,
+                  "MatchDay": 1,
+                  "MatchDayName": "Quarter-Final",
+                  "Status": 2,
+                  "HomeTeam": {
+                    "Id": "team-atlas",
+                    "Name": "Club Atlas",
+                    "ImageUrl": null,
+                    "SportKindName": "Soccer"
+                  },
+                  "AwayTeam": {
+                    "Id": "team-river",
+                    "Name": "River Plate Jr",
+                    "ImageUrl": null,
+                    "SportKindName": "Soccer"
+                  },
+                  "HomeSquad": [],
+                  "AwaySquad": [],
+                  "Events": [],
+                  "HomePenaltyScore": 5,
+                  "AwayPenaltyScore": 4,
+                  "HasPenalties": true,
+                  "PeriodScores": [
+                    {
+                      "HomeScore": 5,
+                      "AwayScore": 4,
+                      "Type": 4
+                    }
+                  ]
+                },
+                {
+                  "Id": "fixture-sf1",
+                  "Date": "2026-05-15",
+                  "HomeTeamScore": 3,
+                  "AwayTeamScore": 0,
+                  "MatchDay": 2,
+                  "MatchDayName": "Semi-Final",
+                  "Status": 2,
+                  "HomeTeam": {
+                    "Id": "team-atlas",
+                    "Name": "Club Atlas",
+                    "ImageUrl": null,
+                    "SportKindName": "Soccer"
+                  },
+                  "AwayTeam": {
+                    "Id": "team-boca",
+                    "Name": "Boca Juniors Jr",
+                    "ImageUrl": null,
+                    "SportKindName": "Soccer"
+                  },
+                  "HomeSquad": [],
+                  "AwaySquad": [],
+                  "Events": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

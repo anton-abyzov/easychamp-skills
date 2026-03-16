@@ -1,0 +1,1264 @@
+{
+  "ImportSource": 99,
+  "ImportMode": 0,
+  "League": {
+    "Name": "Liga Recreativa MX",
+    "Country": "Mexico",
+    "SportKindName": "Soccer",
+    "ImageUrl": null,
+    "Champs": [
+      {
+        "Name": "Copa Verano 2026",
+        "ExternalId": "ps23:comp:copa-verano-2026",
+        "StartDate": "2026-01-10",
+        "EndDate": "2026-02-28",
+        "IsComplete": true,
+        "SportKindName": "Soccer",
+        "LeagueName": "Liga Recreativa MX",
+        "Teams": [
+          {
+            "Id": "ps23:team:c34e2a554438",
+            "Name": "Tigres FC",
+            "ImageUrl": "https://ps23soccer.com/webfiles/ps23/escudos/142.png",
+            "SportKindName": "Soccer",
+            "TeamMembers": [
+              {
+                "Player": {
+                  "FullName": "R. Gutierrez",
+                  "Id": "ps23:player:bd87eef0fa0f",
+                  "FirstName": "R.",
+                  "LastName": "Gutierrez",
+                  "OtherFullName": "",
+                  "SportKindName": "Soccer"
+                }
+              },
+              {
+                "Player": {
+                  "FullName": "M. Salazar",
+                  "Id": "ps23:player:3aa4178f7919",
+                  "FirstName": "M.",
+                  "LastName": "Salazar",
+                  "OtherFullName": "",
+                  "SportKindName": "Soccer"
+                }
+              },
+              {
+                "Player": {
+                  "FullName": "A. Torres",
+                  "Id": "ps23:player:1475a4f87636",
+                  "FirstName": "A.",
+                  "LastName": "Torres",
+                  "OtherFullName": "",
+                  "SportKindName": "Soccer"
+                }
+              },
+              {
+                "Player": {
+                  "FullName": "L. Navarro",
+                  "Id": "ps23:player:b05ea7ba184e",
+                  "FirstName": "L.",
+                  "LastName": "Navarro",
+                  "OtherFullName": "",
+                  "SportKindName": "Soccer"
+                }
+              }
+            ]
+          },
+          {
+            "Id": "ps23:team:43c73130bd0f",
+            "Name": "Lobos Rojos",
+            "ImageUrl": "https://ps23soccer.com/webfiles/ps23/escudos/187.png",
+            "SportKindName": "Soccer",
+            "TeamMembers": [
+              {
+                "Player": {
+                  "FullName": "J. Mendez",
+                  "Id": "ps23:player:dd0debb0279f",
+                  "FirstName": "J.",
+                  "LastName": "Mendez",
+                  "OtherFullName": "",
+                  "SportKindName": "Soccer"
+                }
+              },
+              {
+                "Player": {
+                  "FullName": "F. Reyes",
+                  "Id": "ps23:player:d7a3b4fab622",
+                  "FirstName": "F.",
+                  "LastName": "Reyes",
+                  "OtherFullName": "",
+                  "SportKindName": "Soccer"
+                }
+              }
+            ]
+          },
+          {
+            "Id": "ps23:team:45aa17d9e673",
+            "Name": "Aguilas Doradas",
+            "ImageUrl": "https://ps23soccer.com/webfiles/ps23/escudos/203.png",
+            "SportKindName": "Soccer",
+            "TeamMembers": [
+              {
+                "Player": {
+                  "FullName": "C. Vargas",
+                  "Id": "ps23:player:e17b7add03ea",
+                  "FirstName": "C.",
+                  "LastName": "Vargas",
+                  "OtherFullName": "",
+                  "SportKindName": "Soccer"
+                }
+              },
+              {
+                "Player": {
+                  "FullName": "E. Luna",
+                  "Id": "ps23:player:b9824d87171b",
+                  "FirstName": "E.",
+                  "LastName": "Luna",
+                  "OtherFullName": "",
+                  "SportKindName": "Soccer"
+                }
+              }
+            ]
+          },
+          {
+            "Id": "ps23:team:aec55b6d6ac2",
+            "Name": "Halcones CF",
+            "ImageUrl": "https://ps23soccer.com/webfiles/ps23/escudos/156.png",
+            "SportKindName": "Soccer",
+            "TeamMembers": [
+              {
+                "Player": {
+                  "FullName": "P. Romero",
+                  "Id": "ps23:player:3cf6721de59e",
+                  "FirstName": "P.",
+                  "LastName": "Romero",
+                  "OtherFullName": "",
+                  "SportKindName": "Soccer"
+                }
+              },
+              {
+                "Player": {
+                  "FullName": "D. Castillo",
+                  "Id": "ps23:player:e00d9b3c6b41",
+                  "FirstName": "D.",
+                  "LastName": "Castillo",
+                  "OtherFullName": "",
+                  "SportKindName": "Soccer"
+                }
+              },
+              {
+                "Player": {
+                  "FullName": "S. Herrera",
+                  "Id": "ps23:player:2e9d8d4f617d",
+                  "FirstName": "S.",
+                  "LastName": "Herrera",
+                  "OtherFullName": "",
+                  "SportKindName": "Soccer"
+                }
+              }
+            ]
+          }
+        ],
+        "Stages": [
+          {
+            "Name": "Group Stage",
+            "Type": "League",
+            "Groups": [
+              {
+                "Name": "Group A",
+                "Fixtures": [
+                  {
+                    "Id": "ps23:fixture:tigres-fc-vs-lobos-rojos-1",
+                    "Date": "2026-01-10",
+                    "HomeTeamScore": "3",
+                    "AwayTeamScore": "1",
+                    "HomePenaltyScore": null,
+                    "AwayPenaltyScore": null,
+                    "HasPenalties": false,
+                    "HasOvertime": false,
+                    "MatchDay": 1,
+                    "MatchDayName": "1",
+                    "Status": 2,
+                    "Order": null,
+                    "WinnerTeamId": null,
+                    "HomeTeam": {
+                      "Id": "ps23:team:c34e2a554438",
+                      "Name": "Tigres FC",
+                      "ImageUrl": "https://ps23soccer.com/webfiles/ps23/escudos/142.png",
+                      "SportKindName": "Soccer"
+                    },
+                    "AwayTeam": {
+                      "Id": "ps23:team:43c73130bd0f",
+                      "Name": "Lobos Rojos",
+                      "ImageUrl": "https://ps23soccer.com/webfiles/ps23/escudos/187.png",
+                      "SportKindName": "Soccer"
+                    },
+                    "HomeSquad": [
+                      {
+                        "Player": {
+                          "FullName": "R. Gutierrez",
+                          "Id": "ps23:player:bd87eef0fa0f",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "SquadType": 0,
+                        "IsPlayed": true
+                      },
+                      {
+                        "Player": {
+                          "FullName": "M. Salazar",
+                          "Id": "ps23:player:3aa4178f7919",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "SquadType": 0,
+                        "IsPlayed": true
+                      },
+                      {
+                        "Player": {
+                          "FullName": "A. Torres",
+                          "Id": "ps23:player:1475a4f87636",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "SquadType": 0,
+                        "IsPlayed": true
+                      },
+                      {
+                        "Player": {
+                          "FullName": "L. Navarro",
+                          "Id": "ps23:player:b05ea7ba184e",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "SquadType": 0,
+                        "IsPlayed": true
+                      }
+                    ],
+                    "AwaySquad": [
+                      {
+                        "Player": {
+                          "FullName": "J. Mendez",
+                          "Id": "ps23:player:dd0debb0279f",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "SquadType": 0,
+                        "IsPlayed": true
+                      },
+                      {
+                        "Player": {
+                          "FullName": "F. Reyes",
+                          "Id": "ps23:player:d7a3b4fab622",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "SquadType": 0,
+                        "IsPlayed": true
+                      }
+                    ],
+                    "Events": [
+                      {
+                        "IsHomeEvent": true,
+                        "Minute": "5",
+                        "EventType": "scorer",
+                        "Player": {
+                          "FullName": "R. Gutierrez",
+                          "Id": "ps23:player:bd87eef0fa0f",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "Description": "Goal by R. Gutierrez"
+                      },
+                      {
+                        "IsHomeEvent": true,
+                        "Minute": "10",
+                        "EventType": "scorer",
+                        "Player": {
+                          "FullName": "R. Gutierrez",
+                          "Id": "ps23:player:bd87eef0fa0f",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "Description": "Goal by R. Gutierrez"
+                      },
+                      {
+                        "IsHomeEvent": true,
+                        "Minute": "15",
+                        "EventType": "scorer",
+                        "Player": {
+                          "FullName": "M. Salazar",
+                          "Id": "ps23:player:3aa4178f7919",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "Description": "Goal by M. Salazar"
+                      },
+                      {
+                        "IsHomeEvent": false,
+                        "Minute": "20",
+                        "EventType": "scorer",
+                        "Player": {
+                          "FullName": "J. Mendez",
+                          "Id": "ps23:player:dd0debb0279f",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "Description": "Goal by J. Mendez"
+                      }
+                    ]
+                  },
+                  {
+                    "Id": "ps23:fixture:aguilas-doradas-vs-halcones-cf-1",
+                    "Date": "2026-01-10",
+                    "HomeTeamScore": "0",
+                    "AwayTeamScore": "2",
+                    "HomePenaltyScore": null,
+                    "AwayPenaltyScore": null,
+                    "HasPenalties": false,
+                    "HasOvertime": false,
+                    "MatchDay": 1,
+                    "MatchDayName": "1",
+                    "Status": 2,
+                    "Order": null,
+                    "WinnerTeamId": null,
+                    "HomeTeam": {
+                      "Id": "ps23:team:45aa17d9e673",
+                      "Name": "Aguilas Doradas",
+                      "ImageUrl": "https://ps23soccer.com/webfiles/ps23/escudos/203.png",
+                      "SportKindName": "Soccer"
+                    },
+                    "AwayTeam": {
+                      "Id": "ps23:team:aec55b6d6ac2",
+                      "Name": "Halcones CF",
+                      "ImageUrl": "https://ps23soccer.com/webfiles/ps23/escudos/156.png",
+                      "SportKindName": "Soccer"
+                    },
+                    "HomeSquad": [
+                      {
+                        "Player": {
+                          "FullName": "C. Vargas",
+                          "Id": "ps23:player:e17b7add03ea",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "SquadType": 0,
+                        "IsPlayed": true
+                      },
+                      {
+                        "Player": {
+                          "FullName": "E. Luna",
+                          "Id": "ps23:player:b9824d87171b",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "SquadType": 0,
+                        "IsPlayed": true
+                      }
+                    ],
+                    "AwaySquad": [
+                      {
+                        "Player": {
+                          "FullName": "P. Romero",
+                          "Id": "ps23:player:3cf6721de59e",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "SquadType": 0,
+                        "IsPlayed": true
+                      },
+                      {
+                        "Player": {
+                          "FullName": "D. Castillo",
+                          "Id": "ps23:player:e00d9b3c6b41",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "SquadType": 0,
+                        "IsPlayed": true
+                      },
+                      {
+                        "Player": {
+                          "FullName": "S. Herrera",
+                          "Id": "ps23:player:2e9d8d4f617d",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "SquadType": 0,
+                        "IsPlayed": true
+                      }
+                    ],
+                    "Events": [
+                      {
+                        "IsHomeEvent": false,
+                        "Minute": "5",
+                        "EventType": "scorer",
+                        "Player": {
+                          "FullName": "P. Romero",
+                          "Id": "ps23:player:3cf6721de59e",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "Description": "Goal by P. Romero"
+                      },
+                      {
+                        "IsHomeEvent": false,
+                        "Minute": "10",
+                        "EventType": "scorer",
+                        "Player": {
+                          "FullName": "D. Castillo",
+                          "Id": "ps23:player:e00d9b3c6b41",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "Description": "Goal by D. Castillo"
+                      }
+                    ]
+                  },
+                  {
+                    "Id": "ps23:fixture:lobos-rojos-vs-aguilas-doradas-2",
+                    "Date": "2026-01-17",
+                    "HomeTeamScore": "1",
+                    "AwayTeamScore": "1",
+                    "HomePenaltyScore": null,
+                    "AwayPenaltyScore": null,
+                    "HasPenalties": false,
+                    "HasOvertime": false,
+                    "MatchDay": 2,
+                    "MatchDayName": "2",
+                    "Status": 2,
+                    "Order": null,
+                    "WinnerTeamId": null,
+                    "HomeTeam": {
+                      "Id": "ps23:team:43c73130bd0f",
+                      "Name": "Lobos Rojos",
+                      "ImageUrl": "https://ps23soccer.com/webfiles/ps23/escudos/187.png",
+                      "SportKindName": "Soccer"
+                    },
+                    "AwayTeam": {
+                      "Id": "ps23:team:45aa17d9e673",
+                      "Name": "Aguilas Doradas",
+                      "ImageUrl": "https://ps23soccer.com/webfiles/ps23/escudos/203.png",
+                      "SportKindName": "Soccer"
+                    },
+                    "HomeSquad": [
+                      {
+                        "Player": {
+                          "FullName": "J. Mendez",
+                          "Id": "ps23:player:dd0debb0279f",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "SquadType": 0,
+                        "IsPlayed": true
+                      },
+                      {
+                        "Player": {
+                          "FullName": "F. Reyes",
+                          "Id": "ps23:player:d7a3b4fab622",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "SquadType": 0,
+                        "IsPlayed": true
+                      }
+                    ],
+                    "AwaySquad": [
+                      {
+                        "Player": {
+                          "FullName": "C. Vargas",
+                          "Id": "ps23:player:e17b7add03ea",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "SquadType": 0,
+                        "IsPlayed": true
+                      },
+                      {
+                        "Player": {
+                          "FullName": "E. Luna",
+                          "Id": "ps23:player:b9824d87171b",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "SquadType": 0,
+                        "IsPlayed": true
+                      }
+                    ],
+                    "Events": [
+                      {
+                        "IsHomeEvent": true,
+                        "Minute": "5",
+                        "EventType": "scorer",
+                        "Player": {
+                          "FullName": "J. Mendez",
+                          "Id": "ps23:player:dd0debb0279f",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "Description": "Goal by J. Mendez"
+                      },
+                      {
+                        "IsHomeEvent": false,
+                        "Minute": "10",
+                        "EventType": "scorer",
+                        "Player": {
+                          "FullName": "C. Vargas",
+                          "Id": "ps23:player:e17b7add03ea",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "Description": "Goal by C. Vargas"
+                      }
+                    ]
+                  },
+                  {
+                    "Id": "ps23:fixture:halcones-cf-vs-tigres-fc-2",
+                    "Date": "2026-01-17",
+                    "HomeTeamScore": "2",
+                    "AwayTeamScore": "2",
+                    "HomePenaltyScore": null,
+                    "AwayPenaltyScore": null,
+                    "HasPenalties": false,
+                    "HasOvertime": false,
+                    "MatchDay": 2,
+                    "MatchDayName": "2",
+                    "Status": 2,
+                    "Order": null,
+                    "WinnerTeamId": null,
+                    "HomeTeam": {
+                      "Id": "ps23:team:aec55b6d6ac2",
+                      "Name": "Halcones CF",
+                      "ImageUrl": "https://ps23soccer.com/webfiles/ps23/escudos/156.png",
+                      "SportKindName": "Soccer"
+                    },
+                    "AwayTeam": {
+                      "Id": "ps23:team:c34e2a554438",
+                      "Name": "Tigres FC",
+                      "ImageUrl": "https://ps23soccer.com/webfiles/ps23/escudos/142.png",
+                      "SportKindName": "Soccer"
+                    },
+                    "HomeSquad": [
+                      {
+                        "Player": {
+                          "FullName": "P. Romero",
+                          "Id": "ps23:player:3cf6721de59e",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "SquadType": 0,
+                        "IsPlayed": true
+                      },
+                      {
+                        "Player": {
+                          "FullName": "D. Castillo",
+                          "Id": "ps23:player:e00d9b3c6b41",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "SquadType": 0,
+                        "IsPlayed": true
+                      },
+                      {
+                        "Player": {
+                          "FullName": "S. Herrera",
+                          "Id": "ps23:player:2e9d8d4f617d",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "SquadType": 0,
+                        "IsPlayed": true
+                      }
+                    ],
+                    "AwaySquad": [
+                      {
+                        "Player": {
+                          "FullName": "R. Gutierrez",
+                          "Id": "ps23:player:bd87eef0fa0f",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "SquadType": 0,
+                        "IsPlayed": true
+                      },
+                      {
+                        "Player": {
+                          "FullName": "M. Salazar",
+                          "Id": "ps23:player:3aa4178f7919",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "SquadType": 0,
+                        "IsPlayed": true
+                      },
+                      {
+                        "Player": {
+                          "FullName": "A. Torres",
+                          "Id": "ps23:player:1475a4f87636",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "SquadType": 0,
+                        "IsPlayed": true
+                      },
+                      {
+                        "Player": {
+                          "FullName": "L. Navarro",
+                          "Id": "ps23:player:b05ea7ba184e",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "SquadType": 0,
+                        "IsPlayed": true
+                      }
+                    ],
+                    "Events": [
+                      {
+                        "IsHomeEvent": true,
+                        "Minute": "5",
+                        "EventType": "scorer",
+                        "Player": {
+                          "FullName": "P. Romero",
+                          "Id": "ps23:player:3cf6721de59e",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "Description": "Goal by P. Romero"
+                      },
+                      {
+                        "IsHomeEvent": true,
+                        "Minute": "10",
+                        "EventType": "scorer",
+                        "Player": {
+                          "FullName": "D. Castillo",
+                          "Id": "ps23:player:e00d9b3c6b41",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "Description": "Goal by D. Castillo"
+                      },
+                      {
+                        "IsHomeEvent": false,
+                        "Minute": "15",
+                        "EventType": "scorer",
+                        "Player": {
+                          "FullName": "R. Gutierrez",
+                          "Id": "ps23:player:bd87eef0fa0f",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "Description": "Goal by R. Gutierrez"
+                      },
+                      {
+                        "IsHomeEvent": false,
+                        "Minute": "20",
+                        "EventType": "scorer",
+                        "Player": {
+                          "FullName": "M. Salazar",
+                          "Id": "ps23:player:3aa4178f7919",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "Description": "Goal by M. Salazar"
+                      }
+                    ]
+                  },
+                  {
+                    "Id": "ps23:fixture:tigres-fc-vs-aguilas-doradas-3",
+                    "Date": "2026-01-24",
+                    "HomeTeamScore": "4",
+                    "AwayTeamScore": "0",
+                    "HomePenaltyScore": null,
+                    "AwayPenaltyScore": null,
+                    "HasPenalties": false,
+                    "HasOvertime": false,
+                    "MatchDay": 3,
+                    "MatchDayName": "3",
+                    "Status": 2,
+                    "Order": null,
+                    "WinnerTeamId": null,
+                    "HomeTeam": {
+                      "Id": "ps23:team:c34e2a554438",
+                      "Name": "Tigres FC",
+                      "ImageUrl": "https://ps23soccer.com/webfiles/ps23/escudos/142.png",
+                      "SportKindName": "Soccer"
+                    },
+                    "AwayTeam": {
+                      "Id": "ps23:team:45aa17d9e673",
+                      "Name": "Aguilas Doradas",
+                      "ImageUrl": "https://ps23soccer.com/webfiles/ps23/escudos/203.png",
+                      "SportKindName": "Soccer"
+                    },
+                    "HomeSquad": [
+                      {
+                        "Player": {
+                          "FullName": "R. Gutierrez",
+                          "Id": "ps23:player:bd87eef0fa0f",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "SquadType": 0,
+                        "IsPlayed": true
+                      },
+                      {
+                        "Player": {
+                          "FullName": "M. Salazar",
+                          "Id": "ps23:player:3aa4178f7919",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "SquadType": 0,
+                        "IsPlayed": true
+                      },
+                      {
+                        "Player": {
+                          "FullName": "A. Torres",
+                          "Id": "ps23:player:1475a4f87636",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "SquadType": 0,
+                        "IsPlayed": true
+                      },
+                      {
+                        "Player": {
+                          "FullName": "L. Navarro",
+                          "Id": "ps23:player:b05ea7ba184e",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "SquadType": 0,
+                        "IsPlayed": true
+                      }
+                    ],
+                    "AwaySquad": [
+                      {
+                        "Player": {
+                          "FullName": "C. Vargas",
+                          "Id": "ps23:player:e17b7add03ea",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "SquadType": 0,
+                        "IsPlayed": true
+                      },
+                      {
+                        "Player": {
+                          "FullName": "E. Luna",
+                          "Id": "ps23:player:b9824d87171b",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "SquadType": 0,
+                        "IsPlayed": true
+                      }
+                    ],
+                    "Events": [
+                      {
+                        "IsHomeEvent": true,
+                        "Minute": "5",
+                        "EventType": "scorer",
+                        "Player": {
+                          "FullName": "R. Gutierrez",
+                          "Id": "ps23:player:bd87eef0fa0f",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "Description": "Goal by R. Gutierrez"
+                      },
+                      {
+                        "IsHomeEvent": true,
+                        "Minute": "10",
+                        "EventType": "scorer",
+                        "Player": {
+                          "FullName": "R. Gutierrez",
+                          "Id": "ps23:player:bd87eef0fa0f",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "Description": "Goal by R. Gutierrez"
+                      },
+                      {
+                        "IsHomeEvent": true,
+                        "Minute": "15",
+                        "EventType": "scorer",
+                        "Player": {
+                          "FullName": "M. Salazar",
+                          "Id": "ps23:player:3aa4178f7919",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "Description": "Goal by M. Salazar"
+                      },
+                      {
+                        "IsHomeEvent": true,
+                        "Minute": "20",
+                        "EventType": "scorer",
+                        "Player": {
+                          "FullName": "A. Torres",
+                          "Id": "ps23:player:1475a4f87636",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "Description": "Goal by A. Torres"
+                      }
+                    ]
+                  },
+                  {
+                    "Id": "ps23:fixture:lobos-rojos-vs-halcones-cf-3",
+                    "Date": "2026-01-24",
+                    "HomeTeamScore": "0",
+                    "AwayTeamScore": "1",
+                    "HomePenaltyScore": null,
+                    "AwayPenaltyScore": null,
+                    "HasPenalties": false,
+                    "HasOvertime": false,
+                    "MatchDay": 3,
+                    "MatchDayName": "3",
+                    "Status": 2,
+                    "Order": null,
+                    "WinnerTeamId": null,
+                    "HomeTeam": {
+                      "Id": "ps23:team:43c73130bd0f",
+                      "Name": "Lobos Rojos",
+                      "ImageUrl": "https://ps23soccer.com/webfiles/ps23/escudos/187.png",
+                      "SportKindName": "Soccer"
+                    },
+                    "AwayTeam": {
+                      "Id": "ps23:team:aec55b6d6ac2",
+                      "Name": "Halcones CF",
+                      "ImageUrl": "https://ps23soccer.com/webfiles/ps23/escudos/156.png",
+                      "SportKindName": "Soccer"
+                    },
+                    "HomeSquad": [
+                      {
+                        "Player": {
+                          "FullName": "J. Mendez",
+                          "Id": "ps23:player:dd0debb0279f",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "SquadType": 0,
+                        "IsPlayed": true
+                      },
+                      {
+                        "Player": {
+                          "FullName": "F. Reyes",
+                          "Id": "ps23:player:d7a3b4fab622",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "SquadType": 0,
+                        "IsPlayed": true
+                      }
+                    ],
+                    "AwaySquad": [
+                      {
+                        "Player": {
+                          "FullName": "P. Romero",
+                          "Id": "ps23:player:3cf6721de59e",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "SquadType": 0,
+                        "IsPlayed": true
+                      },
+                      {
+                        "Player": {
+                          "FullName": "D. Castillo",
+                          "Id": "ps23:player:e00d9b3c6b41",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "SquadType": 0,
+                        "IsPlayed": true
+                      },
+                      {
+                        "Player": {
+                          "FullName": "S. Herrera",
+                          "Id": "ps23:player:2e9d8d4f617d",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "SquadType": 0,
+                        "IsPlayed": true
+                      }
+                    ],
+                    "Events": [
+                      {
+                        "IsHomeEvent": false,
+                        "Minute": "5",
+                        "EventType": "scorer",
+                        "Player": {
+                          "FullName": "P. Romero",
+                          "Id": "ps23:player:3cf6721de59e",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "Description": "Goal by P. Romero"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "Name": "Playoffs",
+            "Type": "Playoff",
+            "Groups": [
+              {
+                "Name": "Playoffs",
+                "Fixtures": [
+                  {
+                    "Id": "ps23:fixture:tigres-fc-vs-halcones-cf-sf1",
+                    "Date": "2026-02-07",
+                    "HomeTeamScore": "2",
+                    "AwayTeamScore": "0",
+                    "HomePenaltyScore": null,
+                    "AwayPenaltyScore": null,
+                    "HasPenalties": false,
+                    "HasOvertime": false,
+                    "MatchDay": 1,
+                    "MatchDayName": "semifinal",
+                    "Status": 2,
+                    "Order": 2,
+                    "WinnerTeamId": null,
+                    "HomeTeam": {
+                      "Id": "ps23:team:c34e2a554438",
+                      "Name": "Tigres FC",
+                      "ImageUrl": "https://ps23soccer.com/webfiles/ps23/escudos/142.png",
+                      "SportKindName": "Soccer"
+                    },
+                    "AwayTeam": {
+                      "Id": "ps23:team:aec55b6d6ac2",
+                      "Name": "Halcones CF",
+                      "ImageUrl": "https://ps23soccer.com/webfiles/ps23/escudos/156.png",
+                      "SportKindName": "Soccer"
+                    },
+                    "HomeSquad": [
+                      {
+                        "Player": {
+                          "FullName": "R. Gutierrez",
+                          "Id": "ps23:player:bd87eef0fa0f",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "SquadType": 0,
+                        "IsPlayed": true
+                      },
+                      {
+                        "Player": {
+                          "FullName": "M. Salazar",
+                          "Id": "ps23:player:3aa4178f7919",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "SquadType": 0,
+                        "IsPlayed": true
+                      },
+                      {
+                        "Player": {
+                          "FullName": "A. Torres",
+                          "Id": "ps23:player:1475a4f87636",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "SquadType": 0,
+                        "IsPlayed": true
+                      },
+                      {
+                        "Player": {
+                          "FullName": "L. Navarro",
+                          "Id": "ps23:player:b05ea7ba184e",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "SquadType": 0,
+                        "IsPlayed": true
+                      }
+                    ],
+                    "AwaySquad": [
+                      {
+                        "Player": {
+                          "FullName": "P. Romero",
+                          "Id": "ps23:player:3cf6721de59e",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "SquadType": 0,
+                        "IsPlayed": true
+                      },
+                      {
+                        "Player": {
+                          "FullName": "D. Castillo",
+                          "Id": "ps23:player:e00d9b3c6b41",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "SquadType": 0,
+                        "IsPlayed": true
+                      },
+                      {
+                        "Player": {
+                          "FullName": "S. Herrera",
+                          "Id": "ps23:player:2e9d8d4f617d",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "SquadType": 0,
+                        "IsPlayed": true
+                      }
+                    ],
+                    "Events": [
+                      {
+                        "IsHomeEvent": true,
+                        "Minute": "5",
+                        "EventType": "scorer",
+                        "Player": {
+                          "FullName": "R. Gutierrez",
+                          "Id": "ps23:player:bd87eef0fa0f",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "Description": "Goal by R. Gutierrez"
+                      },
+                      {
+                        "IsHomeEvent": true,
+                        "Minute": "10",
+                        "EventType": "scorer",
+                        "Player": {
+                          "FullName": "M. Salazar",
+                          "Id": "ps23:player:3aa4178f7919",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "Description": "Goal by M. Salazar"
+                      }
+                    ]
+                  },
+                  {
+                    "Id": "ps23:fixture:lobos-rojos-vs-aguilas-doradas-sf2",
+                    "Date": "2026-02-07",
+                    "HomeTeamScore": "1",
+                    "AwayTeamScore": "0",
+                    "HomePenaltyScore": null,
+                    "AwayPenaltyScore": null,
+                    "HasPenalties": false,
+                    "HasOvertime": false,
+                    "MatchDay": 1,
+                    "MatchDayName": "semifinal",
+                    "Status": 2,
+                    "Order": 3,
+                    "WinnerTeamId": null,
+                    "HomeTeam": {
+                      "Id": "ps23:team:43c73130bd0f",
+                      "Name": "Lobos Rojos",
+                      "ImageUrl": "https://ps23soccer.com/webfiles/ps23/escudos/187.png",
+                      "SportKindName": "Soccer"
+                    },
+                    "AwayTeam": {
+                      "Id": "ps23:team:45aa17d9e673",
+                      "Name": "Aguilas Doradas",
+                      "ImageUrl": "https://ps23soccer.com/webfiles/ps23/escudos/203.png",
+                      "SportKindName": "Soccer"
+                    },
+                    "HomeSquad": [
+                      {
+                        "Player": {
+                          "FullName": "J. Mendez",
+                          "Id": "ps23:player:dd0debb0279f",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "SquadType": 0,
+                        "IsPlayed": true
+                      },
+                      {
+                        "Player": {
+                          "FullName": "F. Reyes",
+                          "Id": "ps23:player:d7a3b4fab622",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "SquadType": 0,
+                        "IsPlayed": true
+                      }
+                    ],
+                    "AwaySquad": [
+                      {
+                        "Player": {
+                          "FullName": "C. Vargas",
+                          "Id": "ps23:player:e17b7add03ea",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "SquadType": 0,
+                        "IsPlayed": true
+                      },
+                      {
+                        "Player": {
+                          "FullName": "E. Luna",
+                          "Id": "ps23:player:b9824d87171b",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "SquadType": 0,
+                        "IsPlayed": true
+                      }
+                    ],
+                    "Events": [
+                      {
+                        "IsHomeEvent": true,
+                        "Minute": "5",
+                        "EventType": "scorer",
+                        "Player": {
+                          "FullName": "J. Mendez",
+                          "Id": "ps23:player:dd0debb0279f",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "Description": "Goal by J. Mendez"
+                      }
+                    ]
+                  },
+                  {
+                    "Id": "ps23:fixture:tigres-fc-vs-lobos-rojos-final",
+                    "Date": "2026-02-28",
+                    "HomeTeamScore": "1",
+                    "AwayTeamScore": "1",
+                    "HomePenaltyScore": "4",
+                    "AwayPenaltyScore": "3",
+                    "HasPenalties": true,
+                    "HasOvertime": false,
+                    "MatchDay": 1,
+                    "MatchDayName": "final",
+                    "Status": 2,
+                    "Order": 1,
+                    "WinnerTeamId": "ps23:team:c34e2a554438",
+                    "PeriodScores": [
+                      {
+                        "HomeScore": "1",
+                        "AwayScore": "1",
+                        "Type": "regular_period",
+                        "Number": 1
+                      },
+                      {
+                        "HomeScore": "4",
+                        "AwayScore": "3",
+                        "Type": "penalties",
+                        "Number": 2
+                      }
+                    ],
+                    "HomeTeam": {
+                      "Id": "ps23:team:c34e2a554438",
+                      "Name": "Tigres FC",
+                      "ImageUrl": "https://ps23soccer.com/webfiles/ps23/escudos/142.png",
+                      "SportKindName": "Soccer"
+                    },
+                    "AwayTeam": {
+                      "Id": "ps23:team:43c73130bd0f",
+                      "Name": "Lobos Rojos",
+                      "ImageUrl": "https://ps23soccer.com/webfiles/ps23/escudos/187.png",
+                      "SportKindName": "Soccer"
+                    },
+                    "HomeSquad": [
+                      {
+                        "Player": {
+                          "FullName": "R. Gutierrez",
+                          "Id": "ps23:player:bd87eef0fa0f",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "SquadType": 0,
+                        "IsPlayed": true
+                      },
+                      {
+                        "Player": {
+                          "FullName": "M. Salazar",
+                          "Id": "ps23:player:3aa4178f7919",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "SquadType": 0,
+                        "IsPlayed": true
+                      },
+                      {
+                        "Player": {
+                          "FullName": "A. Torres",
+                          "Id": "ps23:player:1475a4f87636",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "SquadType": 0,
+                        "IsPlayed": true
+                      },
+                      {
+                        "Player": {
+                          "FullName": "L. Navarro",
+                          "Id": "ps23:player:b05ea7ba184e",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "SquadType": 0,
+                        "IsPlayed": true
+                      }
+                    ],
+                    "AwaySquad": [
+                      {
+                        "Player": {
+                          "FullName": "J. Mendez",
+                          "Id": "ps23:player:dd0debb0279f",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "SquadType": 0,
+                        "IsPlayed": true
+                      },
+                      {
+                        "Player": {
+                          "FullName": "F. Reyes",
+                          "Id": "ps23:player:d7a3b4fab622",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "SquadType": 0,
+                        "IsPlayed": true
+                      }
+                    ],
+                    "Events": [
+                      {
+                        "IsHomeEvent": true,
+                        "Minute": "5",
+                        "EventType": "scorer",
+                        "Player": {
+                          "FullName": "R. Gutierrez",
+                          "Id": "ps23:player:bd87eef0fa0f",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "Description": "Goal by R. Gutierrez"
+                      },
+                      {
+                        "IsHomeEvent": false,
+                        "Minute": "10",
+                        "EventType": "scorer",
+                        "Player": {
+                          "FullName": "J. Mendez",
+                          "Id": "ps23:player:dd0debb0279f",
+                          "OtherFullName": "",
+                          "SportKindName": "Soccer"
+                        },
+                        "Description": "Goal by J. Mendez"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

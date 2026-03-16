@@ -1,0 +1,17 @@
+{
+  "eval_id": 3,
+  "eval_name": "diagnose-fix-broken-import",
+  "prompt": "I have an import JSON file at evals/files/broken-import.json that I tried to use with EasyChamp's POST /import/league API, but things went wrong: scores aren't displaying properly, the bracket visualization is broken, and goal events aren't showing up. Please diagnose all the issues in this file and produce a corrected version. Save the fixed file as fixed-import.json.",
+  "assertions": [
+    "Identifies that HomeTeamScore/AwayTeamScore are numbers and must be strings",
+    "Identifies that 'Quarter-Final' must be 'quarterfinal' (lowercase, no hyphen)",
+    "Identifies that 'Semi-Final' must be 'semifinal' (lowercase, no hyphen)",
+    "Identifies that PeriodScores uses HomeScore/AwayScore but must use Home_score/Away_score",
+    "Identifies that PeriodScores Type is 'Penalties' but must be lowercase 'penalties'",
+    "Identifies that EventType 'goal' must be 'scorer'",
+    "Identifies that Champs is at root level but must be inside League object",
+    "Identifies that Player objects are missing OtherFullName field",
+    "Identifies that HomePenaltyScore/AwayPenaltyScore are numbers but must be strings",
+    "The fixed output file has all issues corrected"
+  ]
+}
